@@ -24,7 +24,7 @@ public class OrderController {
         this.orderService = orderService;
     }
 
-    @PostMapping
+    @PostMapping("/sync")
     public ResponseEntity<Object> createOrderSync(@RequestBody CreateOrderDto createOrderDto){
         String orderId = null;
         try {
@@ -37,7 +37,7 @@ public class OrderController {
         return ResponseEntity.status(HttpStatus.CREATED).body(orderId);
     }
 
-    @PostMapping
+    @PostMapping("/async")
     public ResponseEntity<String> createOrderAsync(@RequestBody CreateOrderDto createOrderDto){
         String orderId = orderService.createOrderAsync(createOrderDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(orderId);

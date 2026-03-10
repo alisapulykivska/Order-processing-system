@@ -1,7 +1,8 @@
 package com.kafka.ordermicroservice.service;
 
+import com.kafka.core.OrderCreatedEvent;
 import com.kafka.ordermicroservice.service.dto.CreateOrderDto;
-import com.kafka.ordermicroservice.service.event.OrderCreatedEvent;
+
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,9 +40,13 @@ public class OrderServiceImpl implements OrderService {
             if (exception != null) {
                 LOGGER.error(exception.getMessage());
             } else {
-                LOGGER.info("Order created successfully : {}", result.getRecordMetadata().partition());
+                LOGGER.info("Topic: {}", result.getRecordMetadata().topic());
+                LOGGER.info("Partition: {}", result.getRecordMetadata().partition());
+                LOGGER.info("Offset: {}", result.getRecordMetadata().offset());
             }
         });
+
+        LOGGER.info("Return: {}", orderId);
 
         return orderId;
     }
@@ -61,7 +66,9 @@ public class OrderServiceImpl implements OrderService {
                 orderId,
                 orderCreatedEvent).get();
 
-        LOGGER.info("Order created successfully : {}", result.getRecordMetadata().partition());
+        LOGGER.info("Topic: {}", result.getRecordMetadata().topic());
+        LOGGER.info("Partition: {}", result.getRecordMetadata().partition());
+        LOGGER.info("Offset: {}", result.getRecordMetadata().offset());
 
         return orderId;
     }
