@@ -17,4 +17,9 @@ public class OrderCreatedEventHandler {
     public void handler(OrderCreatedEvent orderCreatedEvent) {
         LOGGER.info("Received product created event: " + orderCreatedEvent.getOrderId());
     }
+
+    @KafkaHandler(isDefault = true)
+    public void handleUnknown(Object unknown) {
+        LOGGER.warn("Received unknown type: {}", unknown);
+    }
 }
