@@ -1,6 +1,7 @@
 package com.kafka.notificationmicroservice.handler;
 
 import com.kafka.core.OrderCreatedEvent;
+import com.kafka.notificationmicroservice.exception.NonRetryableException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.kafka.annotation.KafkaHandler;
@@ -15,6 +16,9 @@ public class OrderCreatedEventHandler {
 
     @KafkaHandler // Map by input DTO
     public void handler(OrderCreatedEvent orderCreatedEvent) {
+        if(true){
+            throw new NonRetryableException("Non retryable exception");
+        }
         LOGGER.info("Received product created event: " + orderCreatedEvent.getOrderId());
     }
 
