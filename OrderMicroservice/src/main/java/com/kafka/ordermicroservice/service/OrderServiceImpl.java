@@ -4,6 +4,7 @@ import com.kafka.core.OrderCreatedEvent;
 import com.kafka.ordermicroservice.service.dto.CreateOrderDto;
 
 import lombok.AllArgsConstructor;
+import org.apache.kafka.clients.producer.ProducerRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -61,10 +62,17 @@ public class OrderServiceImpl implements OrderService {
                 createOrderDto.getPrice(),
                 createOrderDto.getQuantity());
 
-        SendResult<String, OrderCreatedEvent> result = kafkaTemplate.send(
+        ProducerRecord<String, OrderCreatedEvent> record = new ProducerRecord<>(
                 "order-created-events-topic",
                 orderId,
-                orderCreatedEvent).get();
+                orderCreatedEvent
+        );
+
+        record.headers().add("messageId", UUID.randomUUID().toString().getBytes());
+
+        SendResult<String, OrderCreatedEvent> result = kafkaTemplate.send(
+                record).get();
+
 
         LOGGER.info("Topic: {}", result.getRecordMetadata().topic());
         LOGGER.info("Partition: {}", result.getRecordMetadata().partition());
