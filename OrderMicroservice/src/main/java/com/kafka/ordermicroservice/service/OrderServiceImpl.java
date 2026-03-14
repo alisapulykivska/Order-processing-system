@@ -32,10 +32,15 @@ public class OrderServiceImpl implements OrderService {
                 createOrderDto.getPrice(),
                 createOrderDto.getQuantity());
 
-        CompletableFuture<SendResult<String, OrderCreatedEvent>> future = kafkaTemplate.send(
-            "order-created-events-topic",
-            orderId,
-            orderCreatedEvent);
+        ProducerRecord<String, OrderCreatedEvent> record = new ProducerRecord<>(
+                "order-created-events-topic",
+                orderId,
+                orderCreatedEvent
+        );
+
+        record.headers().add("messageId", UUID.randomUUID().toString().getBytes());
+
+        CompletableFuture<SendResult<String, OrderCreatedEvent>> future = kafkaTemplate.send(record);
 
         future.whenComplete((result, exception) -> {
             if (exception != null) {
