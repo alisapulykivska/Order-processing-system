@@ -27,6 +27,7 @@ public class OrderController {
     @PostMapping("/sync")
     public ResponseEntity<Object> createOrderSync(@RequestBody CreateOrderDto createOrderDto){
         String orderId = null;
+
         try {
             orderId = orderService.createOrderSync(createOrderDto);
         } catch (Exception e) {
@@ -34,6 +35,7 @@ public class OrderController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new KafkaSyncErrorMessage(new Date(), e.getMessage()));
         }
+
         return ResponseEntity.status(HttpStatus.CREATED).body(orderId);
     }
 
