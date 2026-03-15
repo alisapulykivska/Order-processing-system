@@ -1,8 +1,7 @@
     package com.kafka.notificationmicroservice.handler;
 
-    import com.kafka.core.OrderCreatedEvent;
+    import com.kafka.core.event.OrderCreatedEvent;
     import com.kafka.notificationmicroservice.exception.NonRetryableException;
-    import com.kafka.notificationmicroservice.exception.RetryableException;
     import com.kafka.notificationmicroservice.persistence.entity.ProcessedEventEntity;
     import com.kafka.notificationmicroservice.persistence.repository.ProcessedEventRepository;
     import lombok.AllArgsConstructor;

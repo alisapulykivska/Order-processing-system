@@ -1,4 +1,4 @@
-package com.kafka.core;
+package com.kafka.core.event;
 import lombok.*;
 
 import java.math.BigDecimal;

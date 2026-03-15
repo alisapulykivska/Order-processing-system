@@ -1,6 +1,6 @@
 package com.kafka.ordermicroservice.service;
 
-import com.kafka.core.OrderCreatedEvent;
+import com.kafka.core.event.OrderCreatedEvent;
 import com.kafka.ordermicroservice.entity.Order;
 import com.kafka.ordermicroservice.entity.OrderItem;
 import com.kafka.ordermicroservice.repository.OrderItemRepository;
@@ -30,16 +30,13 @@ public class OrderServiceImpl implements OrderService {
     private final OrderItemRepository orderItemRepository;
     private final OrderRepository orderRepository;
 
-
-    @Transactional
-    public String createOrderAsync(CreateOrderDto createOrderDto) {
-
+    private String createOrder(CreateOrderDto createOrderDto) {
         Order order = new Order();
         order.setUserId(createOrderDto.getUserId());
         orderRepository.save(order);
 
-        for(OrderItemDto orderItemDto : createOrderDto.getOrderItems()){
-            OrderItem orderItem =  new OrderItem();
+        for (OrderItemDto orderItemDto : createOrderDto.getOrderItems()) {
+            OrderItem orderItem = new OrderItem();
             orderItem.setProductId(orderItemDto.getProductId());
             orderItem.setProductName(orderItemDto.getProductName());
             orderItem.setProductPrice(orderItemDto.getProductPrice());
@@ -48,15 +45,21 @@ public class OrderServiceImpl implements OrderService {
 
             orderItemRepository.save(orderItem);
         }
+        return order.toString();
+    }
 
-        String orderId = order.getId().toString();
+
+    @Transactional
+    public String createOrderAsync(CreateOrderDto createOrderDto) {
+
+        String orderId = createOrder(createOrderDto);
 
         OrderCreatedEvent orderCreatedEvent = new OrderCreatedEvent(
                 orderId,
                 createOrderDto.getOrderItems().get(0).getProductName(),
                 createOrderDto.getOrderItems().get(0).getProductPrice(),
                 createOrderDto.getOrderItems().get(0).getQuantity()
-                );
+        );
 
         ProducerRecord<String, OrderCreatedEvent> record = new ProducerRecord<>(
                 "order-created-events-topic",
@@ -85,8 +88,8 @@ public class OrderServiceImpl implements OrderService {
 
     @Transactional
     public String createOrderSync(CreateOrderDto createOrderDto) throws ExecutionException, InterruptedException {
-        // todo: save to db and use id given from it
-        String orderId = UUID.randomUUID().toString();
+
+        String orderId = createOrder(createOrderDto);
 
         OrderCreatedEvent orderCreatedEvent = new OrderCreatedEvent(
                 orderId,
@@ -113,5 +116,4 @@ public class OrderServiceImpl implements OrderService {
 
         return orderId;
     }
-
 }
