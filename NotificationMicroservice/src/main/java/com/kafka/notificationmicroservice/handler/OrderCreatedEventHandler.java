@@ -31,6 +31,7 @@
         public void handler(@Payload OrderCreatedEvent orderCreatedEvent,
                             @Header("messageId") String messageId,
                             @Header(KafkaHeaders.RECEIVED_KEY) String messageKey) {
+
             LOGGER.info("Received product created event: " + orderCreatedEvent.getOrderId());
 
             ProcessedEventEntity processedEventEntity = processedEventRepository.findByMessageId(messageId);
