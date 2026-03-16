@@ -45,7 +45,7 @@ public class OrderServiceImpl implements OrderService {
 
             orderItemRepository.save(orderItem);
         }
-        return order.toString();
+        return order.getId().toString();
     }
 
 

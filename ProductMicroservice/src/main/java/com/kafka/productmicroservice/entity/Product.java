@@ -16,12 +16,16 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Product {
+    /*
+    Product entity
+     */
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String title;
     private BigDecimal price;
-    private Integer quantity;
+   // private Integer quantity;
     private Long ownerId;
     private LocalDateTime createdOn;
 
