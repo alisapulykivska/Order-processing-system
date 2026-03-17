@@ -1,5 +1,5 @@
 # OrderFlow
-OrderFlow is project to gain hands-on experience working with microservices architecture while creating e-commerce platform
+OrderFlow is project to gain hands-on experience working with microservices architecture while creating an e-commerce platform
 
 ### ✅ The following features are currently implemented: 
 - [x] Kafka configuration (topics, async/sync events)
