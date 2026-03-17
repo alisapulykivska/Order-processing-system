@@ -9,7 +9,7 @@ OrderFlow is project to gain hands-on experience working with microservices arch
 - [x] Cart and additon to cart
 
 ### 📝 Planned to be implemented:
-- [ ] Validatin of DTOs
+- [ ] Validating of DTOs
 - [ ] Delete CartItems from Cart
 - [ ] CRUD for products
 - [ ] LogisticsMicroservice with the shiping/delivery logic
