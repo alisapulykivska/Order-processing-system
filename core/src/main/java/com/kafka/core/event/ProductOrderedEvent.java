@@ -9,7 +9,7 @@ import java.math.BigDecimal;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ProductCreatedEvent {
+public class ProductOrderedEvent {
 
     private String orderId;
     private String title;

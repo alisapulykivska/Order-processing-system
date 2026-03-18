@@ -1,6 +1,6 @@
 package com.kafka.productmicroservice.config;
 
-import com.kafka.core.event.ProductCreatedEvent;
+import com.kafka.core.event.ProductOrderedEvent;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,13 +38,13 @@ public class KafkaConfig {
     }
 
     @Bean
-    ProducerFactory<String, ProductCreatedEvent> producerFactory(){
+    ProducerFactory<String, ProductOrderedEvent> producerFactory(){
         return new DefaultKafkaProducerFactory<>(producerConfigs());
     }
 
     @Bean
-    KafkaTemplate<String, ProductCreatedEvent> kafkaTemplate(){
-        return new KafkaTemplate<String, ProductCreatedEvent>(producerFactory());
+    KafkaTemplate<String, ProductOrderedEvent> kafkaTemplate(){
+        return new KafkaTemplate<String, ProductOrderedEvent>(producerFactory());
     }
 
     @Bean

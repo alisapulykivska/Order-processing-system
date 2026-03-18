@@ -25,7 +25,7 @@ import java.util.concurrent.ExecutionException;
 @AllArgsConstructor
 public class OrderServiceImpl implements OrderService {
 
-    private KafkaTemplate<String, OrderCreatedEvent> kafkaTemplate; // default wrapper
+    private KafkaTemplate<String, Object> kafkaTemplate; // default wrapper
     private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
     private final OrderItemRepository orderItemRepository;
     private final OrderRepository orderRepository;
@@ -61,15 +61,15 @@ public class OrderServiceImpl implements OrderService {
                 createOrderDto.getOrderItems().get(0).getQuantity()
         );
 
-        ProducerRecord<String, OrderCreatedEvent> record = new ProducerRecord<>(
-                "order-created-events-topic",
+        ProducerRecord<String, Object> record = new ProducerRecord<>(
+                "order-created-events",
                 orderId,
                 orderCreatedEvent
         );
 
         record.headers().add("messageId", UUID.randomUUID().toString().getBytes());
 
-        CompletableFuture<SendResult<String, OrderCreatedEvent>> future = kafkaTemplate.send(record);
+        CompletableFuture<SendResult<String, Object>> future = kafkaTemplate.send(record);
 
         future.whenComplete((result, exception) -> {
             if (exception != null) {
@@ -98,15 +98,15 @@ public class OrderServiceImpl implements OrderService {
                 createOrderDto.getOrderItems().get(0).getQuantity()
         );
 
-        ProducerRecord<String, OrderCreatedEvent> record = new ProducerRecord<>(
-                "order-created-events-topic",
+        ProducerRecord<String, Object> record = new ProducerRecord<>(
+                "order-created-events",
                 orderId,
                 orderCreatedEvent
         );
 
         record.headers().add("messageId", UUID.randomUUID().toString().getBytes());
 
-        SendResult<String, OrderCreatedEvent> result = kafkaTemplate.send(
+        SendResult<String, Object> result = kafkaTemplate.send(
                 record).get();
 
 
