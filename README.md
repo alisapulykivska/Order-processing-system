@@ -9,11 +9,12 @@ OrderFlow is project to gain hands-on experience working with microservices arch
 - [x] Cart and additon to cart
 
 ### 📝 Planned to be implemented:
+- [ ] SAGA Orchestration
 - [ ] Validating of DTOs
+- [ ] More custom exceptions
 - [ ] Delete CartItems from Cart
 - [ ] CRUD for products
 - [ ] LogisticsMicroservice with the shiping/delivery logic
 - [ ] Email notifications via NotificationMicroservice
 - [ ] User logic: Authorization, Authentication, Security (JPA tokens)
 - [ ] Metrics and observability: Prometheus, Grafana, additional valuable metrics for existing featuresd
-- [ ] SAGA Orchestration
