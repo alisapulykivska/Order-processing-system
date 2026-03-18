@@ -1,17 +1,17 @@
-package com.kafka.core.command;
+package com.kafka.core.event;
 
 import lombok.*;
 
 import java.math.BigDecimal;
-import java.util.UUID;
 
 @Data
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ReserveProductCommand {
-    private Long productId;
-    private Integer productQuantity;
+public class ProductReservedEvent {
     private Long orderId;
+    private Long productId;
+    private BigDecimal productPrice;
+    private Integer productQuantity;
 }

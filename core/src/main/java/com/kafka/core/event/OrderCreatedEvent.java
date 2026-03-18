@@ -9,10 +9,9 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 public class OrderCreatedEvent {
-
-        private String orderId;
-        private String title;
-        private BigDecimal price;
-        private Integer quantity;
+        private Long orderId;
+        private Long customerId;
+        private Long productId;
+        private Integer productQuantity;
 
 }

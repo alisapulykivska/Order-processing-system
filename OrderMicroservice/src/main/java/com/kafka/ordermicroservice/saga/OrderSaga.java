@@ -1,7 +1,12 @@
 package com.kafka.ordermicroservice.saga;
 
+import com.kafka.core.command.ProcessPaymentCommand;
 import com.kafka.core.command.ReserveProductCommand;
 import com.kafka.core.event.OrderCreatedEvent;
+import com.kafka.core.event.ProductReservedEvent;
+import com.kafka.core.types.OrderStatus;
+import com.kafka.ordermicroservice.service.OrderHistoryService;
+import com.kafka.ordermicroservice.service.OrderHistoryServiceImpl;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,28 +17,35 @@ import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
 
 @Component
-@KafkaListener(topics = "order-created-events", groupId = "order-saga-group", containerFactory = "kafkaListenerContainerFactory")
+@KafkaListener(topics = {"order-created-events", "products-events"},
+        groupId = "order-saga-group")
 @AllArgsConstructor
 public class OrderSaga {
     private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
     private final KafkaTemplate<String, Object> kafkaTemplate;
+    private final OrderHistoryService orderHistoryService;
 
     @KafkaHandler
     public void handleEvent(@Payload OrderCreatedEvent event) {
-        System.out.println("Received OrderCreatedEvent: " + event);
-
         ReserveProductCommand command = new ReserveProductCommand(
-                event.getTitle(),
-                event.getQuantity(),
-                event.getPrice()
+                event.getProductId(),
+                event.getProductQuantity(),
+                event.getOrderId()
         );
         kafkaTemplate.send("product-commands-events", command);
-
-        // save to orderHistory
+        orderHistoryService.add(Long.valueOf(event.getOrderId()), OrderStatus.CREATED);
     }
 
     @KafkaHandler(isDefault = true)
     public void handleUnknown(Object unknown) {
         LOGGER.warn("Received unknown type: {}", unknown);
+    }
+
+    @KafkaHandler
+    public void handleEvent(@Payload ProductReservedEvent event) {
+
+        ProcessPaymentCommand processPaymentCommand = new ProcessPaymentCommand(event.getOrderId(),
+                event.getProductId(), event.getProductPrice(), event.getProductQuantity());
+        kafkaTemplate.send("payments-commands", processPaymentCommand);
     }
 }

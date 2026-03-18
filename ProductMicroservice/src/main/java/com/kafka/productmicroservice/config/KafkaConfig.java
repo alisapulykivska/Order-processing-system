@@ -55,4 +55,12 @@ public class KafkaConfig {
                 .configs(Map.of("min.insync.replicas","2")) // leader + 1 replica
                 .build();
     }
+
+    @Bean
+    NewTopic createProductsEventsTopic() {
+        return TopicBuilder.name("products-events")
+                .partitions(3)
+                .replicas(3)
+                .build();
+    }
 }

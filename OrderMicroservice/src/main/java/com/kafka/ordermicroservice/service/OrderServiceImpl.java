@@ -30,7 +30,7 @@ public class OrderServiceImpl implements OrderService {
     private final OrderItemRepository orderItemRepository;
     private final OrderRepository orderRepository;
 
-    private String createOrder(CreateOrderDto createOrderDto) {
+    private Long createOrder(CreateOrderDto createOrderDto) {
         Order order = new Order();
         order.setUserId(createOrderDto.getUserId());
         orderRepository.save(order);
@@ -45,25 +45,25 @@ public class OrderServiceImpl implements OrderService {
 
             orderItemRepository.save(orderItem);
         }
-        return order.getId().toString();
+        return order.getId();
     }
 
 
     @Transactional
     public String createOrderAsync(CreateOrderDto createOrderDto) {
 
-        String orderId = createOrder(createOrderDto);
+        Long orderId = createOrder(createOrderDto);
 
         OrderCreatedEvent orderCreatedEvent = new OrderCreatedEvent(
                 orderId,
-                createOrderDto.getOrderItems().get(0).getProductName(),
-                createOrderDto.getOrderItems().get(0).getProductPrice(),
+                createOrderDto.getUserId(),
+                createOrderDto.getOrderItems().get(0).getProductId(),
                 createOrderDto.getOrderItems().get(0).getQuantity()
         );
 
         ProducerRecord<String, Object> record = new ProducerRecord<>(
                 "order-created-events",
-                orderId,
+                orderId.toString(),
                 orderCreatedEvent
         );
 
@@ -83,24 +83,24 @@ public class OrderServiceImpl implements OrderService {
 
         LOGGER.info("Return: {}", orderId);
 
-        return orderId;
+        return orderId.toString();
     }
 
     @Transactional
     public String createOrderSync(CreateOrderDto createOrderDto) throws ExecutionException, InterruptedException {
 
-        String orderId = createOrder(createOrderDto);
+        Long orderId = createOrder(createOrderDto);
 
         OrderCreatedEvent orderCreatedEvent = new OrderCreatedEvent(
                 orderId,
-                createOrderDto.getOrderItems().get(0).getProductName(),
-                createOrderDto.getOrderItems().get(0).getProductPrice(),
+                createOrderDto.getUserId(),
+                createOrderDto.getOrderItems().get(0).getProductId(),
                 createOrderDto.getOrderItems().get(0).getQuantity()
         );
 
         ProducerRecord<String, Object> record = new ProducerRecord<>(
                 "order-created-events",
-                orderId,
+                orderId.toString(),
                 orderCreatedEvent
         );
 
@@ -114,6 +114,6 @@ public class OrderServiceImpl implements OrderService {
         LOGGER.info("Partition: {}", result.getRecordMetadata().partition());
         LOGGER.info("Offset: {}", result.getRecordMetadata().offset());
 
-        return orderId;
+        return orderId.toString();
     }
 }

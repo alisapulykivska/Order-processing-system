@@ -7,6 +7,7 @@ import com.kafka.productmicroservice.repository.CartRepository;
 import com.kafka.productmicroservice.repository.ProductRepository;
 import com.kafka.productmicroservice.service.dto.AddToCartDto;
 import com.kafka.productmicroservice.service.dto.CreateProductDto;
+import org.springframework.beans.BeanUtils;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -25,7 +26,7 @@ public class ProductServiceImpl implements ProductService {
         Product product = new Product().builder()
                 .title(createProductDto.getTitle())
                 .price(createProductDto.getPrice())
-                //.quantity(createProductDto.getQuantity())
+                .quantity(createProductDto.getQuantity())
                 .createdOn(LocalDateTime.now())
                 .ownerId(createProductDto.getOwnerId())
                 .build();
@@ -38,6 +39,24 @@ public class ProductServiceImpl implements ProductService {
         productRepository.save(product);
 
         return product.getId().toString();
+    }
+
+    @Override
+    public Product reserve(Product desiredProduct, Long orderId) {
+        // todo: reservation system
+        Product productEntity = productRepository.findById(desiredProduct.getId()).orElseThrow();
+        if (desiredProduct.getQuantity() > productEntity.getQuantity()) {
+            //throw new ProductInsufficientQuantityException(productEntity.getId(), orderId);
+            throw new RuntimeException(productEntity.getId() + "–" + orderId);
+        }
+
+        productEntity.setQuantity(productEntity.getQuantity() - desiredProduct.getQuantity());
+        productRepository.save(productEntity);
+
+        var reservedProduct = new Product();
+        BeanUtils.copyProperties(productEntity, reservedProduct);
+        reservedProduct.setQuantity(desiredProduct.getQuantity());
+        return reservedProduct;
     }
 
     public String addToCart(AddToCartDto addToCartDto) {
@@ -75,4 +94,6 @@ public class ProductServiceImpl implements ProductService {
         }
         return addToCartDto.getUserId().toString();
     }
+
+
 }

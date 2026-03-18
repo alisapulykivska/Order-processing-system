@@ -25,8 +25,12 @@ public class Product {
     private Long id;
     private String title;
     private BigDecimal price;
-   // private Integer quantity;
+    private Integer quantity;
     private Long ownerId;
     private LocalDateTime createdOn;
 
+    public Product(Long productId, Integer productQuantity) {
+        this.id = productId;
+        this.quantity = productQuantity;
+    }
 }

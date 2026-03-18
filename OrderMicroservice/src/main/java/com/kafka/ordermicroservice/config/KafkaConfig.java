@@ -66,4 +66,12 @@ public class KafkaConfig {
                 .configs(Map.of("min.insync.replicas","2")) // leader + 1 replica
                 .build();
     }
+
+    @Bean
+    NewTopic createProductsCommandsTopic(){
+        return TopicBuilder.name("payments-commands")
+                .partitions(3)
+                .replicas(3)
+                .build();
+    }
 }
