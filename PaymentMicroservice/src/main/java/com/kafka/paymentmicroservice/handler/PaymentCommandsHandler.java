@@ -43,4 +43,14 @@ public class PaymentCommandsHandler {
             kafkaTemplate.send("payments-events",paymentFailedEvent);
         }
     }
+    /*
+    Used when testing compensation transaction
+    @KafkaHandler
+    public void handleCommand(@Payload ProcessPaymentCommand command) {
+        logger.info("Sending payment failed");
+        PaymentFailedEvent paymentFailedEvent = new PaymentFailedEvent(command.getOrderId(),
+                command.getProductId(),
+                command.getProductQuantity());
+        kafkaTemplate.send("payments-events",paymentFailedEvent);
+    }*/
 }

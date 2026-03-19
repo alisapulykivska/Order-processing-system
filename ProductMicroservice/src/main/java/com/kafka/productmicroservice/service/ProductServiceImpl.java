@@ -95,5 +95,12 @@ public class ProductServiceImpl implements ProductService {
         return addToCartDto.getUserId().toString();
     }
 
+    @Override
+    public void cancelReservation(Product productToCancel, Long orderId) {
+        Product product = productRepository.findById(productToCancel.getId()).orElseThrow();
+        product.setQuantity(product.getQuantity() + productToCancel.getQuantity());
+        productRepository.save(product);
+    }
+
 
 }

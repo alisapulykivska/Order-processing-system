@@ -1,6 +1,8 @@
 package com.kafka.productmicroservice.service.handler;
 
+import com.kafka.core.command.CancelProductReservationCommand;
 import com.kafka.core.command.ReserveProductCommand;
+import com.kafka.core.event.ProductReservationCancelledEvent;
 import com.kafka.core.event.ProductReservationFailedEvent;
 import com.kafka.core.event.ProductReservedEvent;
 import com.kafka.productmicroservice.entity.Product;
@@ -41,5 +43,16 @@ public class ProductCommandsHandler {
                     command.getOrderId(), command.getProductQuantity());
             kafkaTemplate.send("products-events", productReservationFailedEvent);
         }
+    }
+
+    @KafkaHandler
+    public void handleCommand(@Payload CancelProductReservationCommand command){
+        log.info("Handling CancelProductReservationCommand {}", command);
+        Product productToCancel = new Product(command.getProductId(), command.getProductQuantity());
+        productService.cancelReservation(productToCancel, command.getOrderId());
+
+        ProductReservationCancelledEvent productReservationCancelledEvent =
+                new ProductReservationCancelledEvent(command.getProductId(), command.getOrderId());
+        kafkaTemplate.send("products-events", productReservationCancelledEvent);
     }
 }

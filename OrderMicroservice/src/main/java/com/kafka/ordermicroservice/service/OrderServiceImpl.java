@@ -123,10 +123,18 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public void approveOrder(Long orderId) {
         Order order = orderRepository.findById(orderId).orElse(null);
-        Assert.notNull(order, "No order is found with id " + orderId + " in the database table");
+        Assert.notNull(order, "No order is found with id " + orderId);
         order.setStatus(OrderStatus.APPROVED);
         orderRepository.save(order);
         OrderApprovedEvent orderApprovedEvent = new OrderApprovedEvent(orderId);
         kafkaTemplate.send("orders-events", orderApprovedEvent);
+    }
+
+    @Override
+    public void rejectOrder(Long orderId) {
+        Order order = orderRepository.findById(orderId).orElse(null);
+        Assert.notNull(order, "No order is found with id " + orderId);
+        order.setStatus(OrderStatus.REJECTED);
+        orderRepository.save(order);
     }
 }
