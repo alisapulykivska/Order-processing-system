@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
+import java.util.HashMap;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -56,12 +57,16 @@ public class OrderServiceImpl implements OrderService {
     public String createOrderAsync(CreateOrderDto createOrderDto) {
 
         Long orderId = createOrder(createOrderDto);
+        HashMap<Long, Integer> products = new HashMap<>();
+        for(OrderItemDto orderItem : createOrderDto.getOrderItems()){
+            products.put(orderItem.getProductId(), orderItem.getQuantity());
+        }
+
 
         OrderCreatedEvent orderCreatedEvent = new OrderCreatedEvent(
                 orderId,
                 createOrderDto.getUserId(),
-                createOrderDto.getOrderItems().get(0).getProductId(),
-                createOrderDto.getOrderItems().get(0).getQuantity()
+                products
         );
 
         ProducerRecord<String, Object> record = new ProducerRecord<>(
@@ -93,12 +98,20 @@ public class OrderServiceImpl implements OrderService {
     public String createOrderSync(CreateOrderDto createOrderDto) throws ExecutionException, InterruptedException {
 
         Long orderId = createOrder(createOrderDto);
+        HashMap<Long, Integer> products = new HashMap<>();
+        for(OrderItemDto orderItem : createOrderDto.getOrderItems()) {
+            if (orderItem.getProductId() != null) {
+                products.put(orderItem.getProductId(), orderItem.getQuantity());
+            } else {
+                LOGGER.warn("Skipping item with null productId: {}", orderItem);
+            }
+        }
+
 
         OrderCreatedEvent orderCreatedEvent = new OrderCreatedEvent(
                 orderId,
                 createOrderDto.getUserId(),
-                createOrderDto.getOrderItems().get(0).getProductId(),
-                createOrderDto.getOrderItems().get(0).getQuantity()
+                products
         );
 
         ProducerRecord<String, Object> record = new ProducerRecord<>(

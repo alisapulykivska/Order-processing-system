@@ -1,5 +1,6 @@
 package com.kafka.productmicroservice.service;
 
+import com.kafka.core.entity.ReservedProduct;
 import com.kafka.productmicroservice.entity.Cart;
 import com.kafka.productmicroservice.entity.CartItem;
 import com.kafka.productmicroservice.entity.Product;
@@ -42,7 +43,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Product reserve(Product desiredProduct, Long orderId) {
+    public ReservedProduct reserve(Product desiredProduct, Long orderId) {
         // todo: reservation system
         Product productEntity = productRepository.findById(desiredProduct.getId()).orElseThrow();
         if (desiredProduct.getQuantity() > productEntity.getQuantity()) {
@@ -53,10 +54,11 @@ public class ProductServiceImpl implements ProductService {
         productEntity.setQuantity(productEntity.getQuantity() - desiredProduct.getQuantity());
         productRepository.save(productEntity);
 
-        var reservedProduct = new Product();
-        BeanUtils.copyProperties(productEntity, reservedProduct);
-        reservedProduct.setQuantity(desiredProduct.getQuantity());
-        return reservedProduct;
+        return new ReservedProduct(
+                desiredProduct.getId(),
+                productEntity.getPrice(),
+                desiredProduct.getQuantity()
+        );
     }
 
     public String addToCart(AddToCartDto addToCartDto) {

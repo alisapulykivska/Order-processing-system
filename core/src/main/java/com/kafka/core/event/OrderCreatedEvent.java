@@ -2,6 +2,7 @@ package com.kafka.core.event;
 import lombok.*;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
 
 @Data
 @Getter
@@ -11,7 +12,8 @@ import java.math.BigDecimal;
 public class OrderCreatedEvent {
         private Long orderId;
         private Long customerId;
-        private Long productId;
-        private Integer productQuantity;
+        private HashMap<Long, Integer> products;
+        //private Long productId;
+        //private Integer productQuantity;
 
 }

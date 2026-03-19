@@ -19,14 +19,13 @@ public class Payment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private Long orderId;
-    private Long productId;
-    private BigDecimal productPrice;
-    private Integer productQuantity;
+    //private Long productId;
+    //private BigDecimal productPrice;
+    //private Integer productQuantity;
+    private BigDecimal totalPrice;
 
-    public Payment(Long orderId, Long productId, BigDecimal productPrice, Integer productQuantity) {
+    public Payment(Long orderId, BigDecimal totalPrice) {
         this.orderId = orderId;
-        this.productId = productId;
-        this.productPrice = productPrice;
-        this.productQuantity = productQuantity;
+        this.totalPrice = totalPrice;
     }
 }

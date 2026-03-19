@@ -25,9 +25,9 @@ public class OrderSaga {
 
     @KafkaHandler
     public void handleEvent(@Payload OrderCreatedEvent event) {
+        LOGGER.info("OrderCreatedEvent: {}", event);
         ReserveProductCommand command = new ReserveProductCommand(
-                event.getProductId(),
-                event.getProductQuantity(),
+                event.getProducts(),
                 event.getOrderId()
         );
         kafkaTemplate.send("products-commands", command);
@@ -43,7 +43,7 @@ public class OrderSaga {
     public void handleEvent(@Payload ProductReservedEvent event) {
         LOGGER.info("Received ProductReservedEvent {}", event);
         ProcessPaymentCommand processPaymentCommand = new ProcessPaymentCommand(event.getOrderId(),
-                event.getProductId(), event.getProductPrice(), event.getProductQuantity());
+                event.getReservedProducts());
         kafkaTemplate.send("payments-commands", processPaymentCommand);
     }
 

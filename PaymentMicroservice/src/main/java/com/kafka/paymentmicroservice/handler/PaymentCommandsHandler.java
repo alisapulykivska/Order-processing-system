@@ -1,6 +1,7 @@
 package com.kafka.paymentmicroservice.handler;
 
 import com.kafka.core.command.ProcessPaymentCommand;
+import com.kafka.core.entity.ReservedProduct;
 import com.kafka.core.event.PaymentFailedEvent;
 import com.kafka.core.event.PaymentProcessedEvent;
 import com.kafka.core.exception.CreditCardProcessorUnavailableException;
@@ -15,6 +16,9 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Component
 @KafkaListener(topics = "payments-commands")
 @AllArgsConstructor
@@ -27,20 +31,18 @@ public class PaymentCommandsHandler {
     public void handleCommand(@Payload ProcessPaymentCommand command) {
         logger.info("Processing ProcessPaymentCommand {}", command);
         try {
-            Payment payment = new Payment(command.getOrderId(),
-                    command.getProductId(),
-                    command.getProductPrice(),
-                    command.getProductQuantity());
-            Payment processedPayment = paymentService.process(payment);
+            Payment processedPayment = paymentService.process(command.getReservedProducts(), command.getOrderId());
             PaymentProcessedEvent paymentProcessedEvent = new PaymentProcessedEvent(processedPayment.getOrderId(),
                     processedPayment.getId());
             kafkaTemplate.send("payments-events", paymentProcessedEvent);
         } catch (CreditCardProcessorUnavailableException e) {
             logger.error(e.getLocalizedMessage(), e);
-            PaymentFailedEvent paymentFailedEvent = new PaymentFailedEvent(command.getOrderId(),
+            /*PaymentFailedEvent paymentFailedEvent = new PaymentFailedEvent(command.getOrderId(),
                     command.getProductId(),
                     command.getProductQuantity());
             kafkaTemplate.send("payments-events",paymentFailedEvent);
+            todo: return to it later
+             */
         }
     }
     /*

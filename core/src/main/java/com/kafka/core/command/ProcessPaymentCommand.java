@@ -1,8 +1,10 @@
 package com.kafka.core.command;
 
+import com.kafka.core.entity.ReservedProduct;
 import lombok.*;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Data
 @Getter
@@ -11,7 +13,5 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 public class ProcessPaymentCommand {
     private Long orderId;
-    private Long productId;
-    private BigDecimal productPrice;
-    private Integer productQuantity;
+    List<ReservedProduct> reservedProducts;
 }

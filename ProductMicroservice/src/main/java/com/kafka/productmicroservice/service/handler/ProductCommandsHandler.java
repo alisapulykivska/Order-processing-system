@@ -2,6 +2,7 @@ package com.kafka.productmicroservice.service.handler;
 
 import com.kafka.core.command.CancelProductReservationCommand;
 import com.kafka.core.command.ReserveProductCommand;
+import com.kafka.core.entity.ReservedProduct;
 import com.kafka.core.event.ProductReservationCancelledEvent;
 import com.kafka.core.event.ProductReservationFailedEvent;
 import com.kafka.core.event.ProductReservedEvent;
@@ -16,6 +17,11 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 @Component
 @KafkaListener(topics = "products-commands")
 @AllArgsConstructor
@@ -27,21 +33,28 @@ public class ProductCommandsHandler {
     @KafkaHandler
     public void handleCommand(@Payload ReserveProductCommand command) {
         try {
+            List<ReservedProduct> reservedProducts = new ArrayList<>();
             log.info("Handling ReserveProductCommand {}", command);
-            Product desiredProduct = new Product(command.getProductId(), command.getProductQuantity());
-            Product reservedProduct = productService.reserve(desiredProduct, command.getOrderId());
-            log.info("Reserving product");
-            ProductReservedEvent productReservedEvent = new ProductReservedEvent(command.getOrderId(),
-                    command.getProductId(),
-                    reservedProduct.getPrice(),
-                    command.getProductQuantity());
+            for(Map.Entry entry : command.getProducts().entrySet()) {
+                Long productId = (Long) entry.getKey();
+                Integer quantity = (Integer) entry.getValue();
+
+                Product desiredProduct = new Product(productId, quantity);
+                ReservedProduct reservedProduct = productService.reserve(desiredProduct, command.getOrderId());
+
+                log.info("Reserving product {}", productId);
+                reservedProducts.add(reservedProduct);
+            }
+            ProductReservedEvent productReservedEvent = new ProductReservedEvent(command.getOrderId(), reservedProducts);
             kafkaTemplate.send("products-events", productReservedEvent);
         } catch (Exception e){
             log.info("Exception!");
             log.error(e.getMessage());
-            ProductReservationFailedEvent productReservationFailedEvent = new ProductReservationFailedEvent(command.getProductId(),
+            /*ProductReservationFailedEvent productReservationFailedEvent = new ProductReservationFailedEvent(command.getProductId(),
                     command.getOrderId(), command.getProductQuantity());
             kafkaTemplate.send("products-events", productReservationFailedEvent);
+            todo: return to this transaction later
+             */
         }
     }
 
