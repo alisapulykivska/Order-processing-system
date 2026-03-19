@@ -50,17 +50,8 @@ public class KafkaConfig {
     }
 
     @Bean
-    NewTopic orderCreatedTopic(){
-        return TopicBuilder.name("order-created-events")
-                .partitions(3)
-                .replicas(3)
-                .configs(Map.of("min.insync.replicas","2")) // leader + 1 replica
-                .build();
-    }
-
-    @Bean
-    NewTopic newTopic(){
-        return TopicBuilder.name("product-commands-events")
+    NewTopic createOrdersEventsTopic(){
+        return TopicBuilder.name("orders-events")
                 .partitions(3)
                 .replicas(3)
                 .configs(Map.of("min.insync.replicas","2")) // leader + 1 replica
@@ -69,7 +60,23 @@ public class KafkaConfig {
 
     @Bean
     NewTopic createProductsCommandsTopic(){
+        return TopicBuilder.name("products-commands")
+                .partitions(3)
+                .replicas(3)
+                .configs(Map.of("min.insync.replicas","2")) // leader + 1 replica
+                .build();
+    }
+
+    @Bean
+    NewTopic createPaymentsCommandsTopic(){
         return TopicBuilder.name("payments-commands")
+                .partitions(3)
+                .replicas(3)
+                .build();
+    }
+    @Bean
+    NewTopic createOrdersCommandsTopic() {
+        return TopicBuilder.name("orders-commands")
                 .partitions(3)
                 .replicas(3)
                 .build();

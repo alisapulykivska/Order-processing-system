@@ -18,7 +18,7 @@ import java.util.Map;
 @Configuration
 public class KafkaConfig {
 
-    @Autowired
+    /*@Autowired
     Environment environment;
 
     Map<String, Object> producerConfigs(){
@@ -40,11 +40,11 @@ public class KafkaConfig {
     @Bean
     ProducerFactory<String, ProductOrderedEvent> producerFactory(){
         return new DefaultKafkaProducerFactory<>(producerConfigs());
-    }
+    }*/
 
     @Bean
-    KafkaTemplate<String, ProductOrderedEvent> kafkaTemplate(){
-        return new KafkaTemplate<String, ProductOrderedEvent>(producerFactory());
+    KafkaTemplate<String, Object> kafkaTemplate(ProducerFactory<String, Object> producerFactory) {
+        return new KafkaTemplate<>(producerFactory);
     }
 
     @Bean

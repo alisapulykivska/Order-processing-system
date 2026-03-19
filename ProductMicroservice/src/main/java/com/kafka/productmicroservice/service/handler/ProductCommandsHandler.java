@@ -15,7 +15,7 @@ import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
 
 @Component
-@KafkaListener(topics = "orders-commands")
+@KafkaListener(topics = "products-commands")
 @AllArgsConstructor
 public class ProductCommandsHandler {
     private static final Logger log = LoggerFactory.getLogger(ProductCommandsHandler.class);
@@ -25,14 +25,17 @@ public class ProductCommandsHandler {
     @KafkaHandler
     public void handleCommand(@Payload ReserveProductCommand command) {
         try {
+            log.info("Handling ReserveProductCommand {}", command);
             Product desiredProduct = new Product(command.getProductId(), command.getProductQuantity());
             Product reservedProduct = productService.reserve(desiredProduct, command.getOrderId());
+            log.info("Reserving product");
             ProductReservedEvent productReservedEvent = new ProductReservedEvent(command.getOrderId(),
                     command.getProductId(),
                     reservedProduct.getPrice(),
                     command.getProductQuantity());
             kafkaTemplate.send("products-events", productReservedEvent);
         } catch (Exception e){
+            log.info("Exception!");
             log.error(e.getMessage());
             ProductReservationFailedEvent productReservationFailedEvent = new ProductReservationFailedEvent(command.getProductId(),
                     command.getOrderId(), command.getProductQuantity());

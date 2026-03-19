@@ -1,6 +1,8 @@
 package com.kafka.ordermicroservice.service;
 
+import com.kafka.core.event.OrderApprovedEvent;
 import com.kafka.core.event.OrderCreatedEvent;
+import com.kafka.core.types.OrderStatus;
 import com.kafka.ordermicroservice.entity.Order;
 import com.kafka.ordermicroservice.entity.OrderItem;
 import com.kafka.ordermicroservice.repository.OrderItemRepository;
@@ -16,6 +18,7 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.Assert;
 
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -62,7 +65,7 @@ public class OrderServiceImpl implements OrderService {
         );
 
         ProducerRecord<String, Object> record = new ProducerRecord<>(
-                "order-created-events",
+                "orders-events",
                 orderId.toString(),
                 orderCreatedEvent
         );
@@ -99,7 +102,7 @@ public class OrderServiceImpl implements OrderService {
         );
 
         ProducerRecord<String, Object> record = new ProducerRecord<>(
-                "order-created-events",
+                "orders-events",
                 orderId.toString(),
                 orderCreatedEvent
         );
@@ -115,5 +118,15 @@ public class OrderServiceImpl implements OrderService {
         LOGGER.info("Offset: {}", result.getRecordMetadata().offset());
 
         return orderId.toString();
+    }
+
+    @Override
+    public void approveOrder(Long orderId) {
+        Order order = orderRepository.findById(orderId).orElse(null);
+        Assert.notNull(order, "No order is found with id " + orderId + " in the database table");
+        order.setStatus(OrderStatus.APPROVED);
+        orderRepository.save(order);
+        OrderApprovedEvent orderApprovedEvent = new OrderApprovedEvent(orderId);
+        kafkaTemplate.send("orders-events", orderApprovedEvent);
     }
 }

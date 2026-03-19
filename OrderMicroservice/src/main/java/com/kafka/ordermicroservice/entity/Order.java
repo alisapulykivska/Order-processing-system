@@ -1,5 +1,6 @@
 package com.kafka.ordermicroservice.entity;
 
+import com.kafka.core.types.OrderStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -27,5 +28,7 @@ public class Order {
             orphanRemoval = true
     )
     private List<OrderItem> items = new ArrayList<>();
+
+    private OrderStatus status;
 
 }
