@@ -1,6 +1,10 @@
 package com.kafka.core.event;
 
+import com.kafka.core.entity.ReservedProduct;
 import lombok.*;
+
+import java.util.HashMap;
+import java.util.List;
 
 @Data
 @Getter
@@ -8,7 +12,6 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ProductReservationFailedEvent {
-    private Long productId;
     private Long orderId;
-    private Integer productQuantity;
+    private HashMap<Long, Integer> products;
 }

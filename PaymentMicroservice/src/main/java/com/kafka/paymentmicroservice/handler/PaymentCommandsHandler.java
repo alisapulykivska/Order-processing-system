@@ -37,22 +37,18 @@ public class PaymentCommandsHandler {
             kafkaTemplate.send("payments-events", paymentProcessedEvent);
         } catch (CreditCardProcessorUnavailableException e) {
             logger.error(e.getLocalizedMessage(), e);
-            /*PaymentFailedEvent paymentFailedEvent = new PaymentFailedEvent(command.getOrderId(),
-                    command.getProductId(),
-                    command.getProductQuantity());
+            PaymentFailedEvent paymentFailedEvent = new PaymentFailedEvent(command.getOrderId(),
+                    command.getReservedProducts());
             kafkaTemplate.send("payments-events",paymentFailedEvent);
-            todo: return to it later
-             */
         }
     }
     /*
-    Used when testing compensation transaction
+    //Used when testing compensation transaction
     @KafkaHandler
     public void handleCommand(@Payload ProcessPaymentCommand command) {
         logger.info("Sending payment failed");
         PaymentFailedEvent paymentFailedEvent = new PaymentFailedEvent(command.getOrderId(),
-                command.getProductId(),
-                command.getProductQuantity());
+                    command.getReservedProducts());
         kafkaTemplate.send("payments-events",paymentFailedEvent);
     }*/
 }

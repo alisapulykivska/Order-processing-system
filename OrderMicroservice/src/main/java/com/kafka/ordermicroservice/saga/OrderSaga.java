@@ -64,8 +64,7 @@ public class OrderSaga {
     public void handleEvent(@Payload PaymentFailedEvent event){
         LOGGER.info("Received PaymentFailedEvent {}", event);
         CancelProductReservationCommand cancelProductReservationCommand =
-                new CancelProductReservationCommand(event.getProductId(),
-                        event.getOrderId(), event.getProductQuantity());
+                new CancelProductReservationCommand(event.getOrderId(), event.getProducts());
         kafkaTemplate.send("products-commands", cancelProductReservationCommand);
     }
 

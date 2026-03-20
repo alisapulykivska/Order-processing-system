@@ -98,10 +98,12 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public void cancelReservation(Product productToCancel, Long orderId) {
-        Product product = productRepository.findById(productToCancel.getId()).orElseThrow();
-        product.setQuantity(product.getQuantity() + productToCancel.getQuantity());
-        productRepository.save(product);
+    public void cancelReservation(List<ReservedProduct> productsToCancel, Long orderId) {
+        for(ReservedProduct reservedProduct : productsToCancel) {
+            Product product = productRepository.findById(reservedProduct.getProductId()).orElseThrow();
+            product.setQuantity(product.getQuantity() + reservedProduct.getQuantity());
+            productRepository.save(product);
+        }
     }
 
 

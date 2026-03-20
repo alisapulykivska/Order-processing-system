@@ -1,6 +1,9 @@
 package com.kafka.core.command;
 
+import com.kafka.core.entity.ReservedProduct;
 import lombok.*;
+
+import java.util.List;
 
 @Data
 @Getter
@@ -8,7 +11,6 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CancelProductReservationCommand {
-    private Long productId;
     private Long orderId;
-    private Integer productQuantity;
+    private List<ReservedProduct> products;
 }

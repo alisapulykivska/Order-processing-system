@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Component
 @KafkaListener(topics = "products-commands")
@@ -50,22 +51,21 @@ public class ProductCommandsHandler {
         } catch (Exception e){
             log.info("Exception!");
             log.error(e.getMessage());
-            /*ProductReservationFailedEvent productReservationFailedEvent = new ProductReservationFailedEvent(command.getProductId(),
-                    command.getOrderId(), command.getProductQuantity());
+            ProductReservationFailedEvent productReservationFailedEvent = new ProductReservationFailedEvent(
+                    command.getOrderId(), command.getProducts());
             kafkaTemplate.send("products-events", productReservationFailedEvent);
-            todo: return to this transaction later
-             */
         }
     }
 
     @KafkaHandler
     public void handleCommand(@Payload CancelProductReservationCommand command){
         log.info("Handling CancelProductReservationCommand {}", command);
-        Product productToCancel = new Product(command.getProductId(), command.getProductQuantity());
-        productService.cancelReservation(productToCancel, command.getOrderId());
+        productService.cancelReservation(command.getProducts(), command.getOrderId());
+        List<Long> productIds = command.getProducts().stream().map(ReservedProduct::getProductId)
+                .collect(Collectors.toList());
 
         ProductReservationCancelledEvent productReservationCancelledEvent =
-                new ProductReservationCancelledEvent(command.getProductId(), command.getOrderId());
+                new ProductReservationCancelledEvent(productIds, command.getOrderId());
         kafkaTemplate.send("products-events", productReservationCancelledEvent);
     }
 }

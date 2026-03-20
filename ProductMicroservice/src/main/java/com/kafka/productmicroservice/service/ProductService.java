@@ -5,9 +5,11 @@ import com.kafka.productmicroservice.entity.Product;
 import com.kafka.productmicroservice.service.dto.AddToCartDto;
 import com.kafka.productmicroservice.service.dto.CreateProductDto;
 
+import java.util.List;
+
 public interface ProductService {
     String createProductAsync(CreateProductDto createProductDto);
     ReservedProduct reserve(Product desiredProduct, Long orderId);
     String addToCart(AddToCartDto addToCartDto);
-    void cancelReservation(Product productToCancel, Long orderId);
+    void cancelReservation(List<ReservedProduct> products, Long orderId);
 }
