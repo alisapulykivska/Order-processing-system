@@ -1,5 +1,6 @@
 package com.kafka.productmicroservice.service;
 
+import com.kafka.core.entity.ReservedProduct;
 import com.kafka.productmicroservice.entity.Cart;
 import com.kafka.productmicroservice.entity.CartItem;
 import com.kafka.productmicroservice.entity.Product;
@@ -7,6 +8,7 @@ import com.kafka.productmicroservice.repository.CartRepository;
 import com.kafka.productmicroservice.repository.ProductRepository;
 import com.kafka.productmicroservice.service.dto.AddToCartDto;
 import com.kafka.productmicroservice.service.dto.CreateProductDto;
+import org.springframework.beans.BeanUtils;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -25,7 +27,7 @@ public class ProductServiceImpl implements ProductService {
         Product product = new Product().builder()
                 .title(createProductDto.getTitle())
                 .price(createProductDto.getPrice())
-                //.quantity(createProductDto.getQuantity())
+                .quantity(createProductDto.getQuantity())
                 .createdOn(LocalDateTime.now())
                 .ownerId(createProductDto.getOwnerId())
                 .build();
@@ -38,6 +40,25 @@ public class ProductServiceImpl implements ProductService {
         productRepository.save(product);
 
         return product.getId().toString();
+    }
+
+    @Override
+    public ReservedProduct reserve(Product desiredProduct, Long orderId) {
+        // todo: reservation system
+        Product productEntity = productRepository.findById(desiredProduct.getId()).orElseThrow();
+        if (desiredProduct.getQuantity() > productEntity.getQuantity()) {
+            //throw new ProductInsufficientQuantityException(productEntity.getId(), orderId);
+            throw new RuntimeException(productEntity.getId() + "–" + orderId);
+        }
+
+        productEntity.setQuantity(productEntity.getQuantity() - desiredProduct.getQuantity());
+        productRepository.save(productEntity);
+
+        return new ReservedProduct(
+                desiredProduct.getId(),
+                productEntity.getPrice(),
+                desiredProduct.getQuantity()
+        );
     }
 
     public String addToCart(AddToCartDto addToCartDto) {
@@ -75,4 +96,15 @@ public class ProductServiceImpl implements ProductService {
         }
         return addToCartDto.getUserId().toString();
     }
+
+    @Override
+    public void cancelReservation(List<ReservedProduct> productsToCancel, Long orderId) {
+        for(ReservedProduct reservedProduct : productsToCancel) {
+            Product product = productRepository.findById(reservedProduct.getProductId()).orElseThrow();
+            product.setQuantity(product.getQuantity() + reservedProduct.getQuantity());
+            productRepository.save(product);
+        }
+    }
+
+
 }

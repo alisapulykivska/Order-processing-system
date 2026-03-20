@@ -7,4 +7,6 @@ import java.util.concurrent.ExecutionException;
 public interface OrderService {
     String createOrderSync(CreateOrderDto createOrderDto) throws ExecutionException, InterruptedException;
     String createOrderAsync(CreateOrderDto createOrderDto);
+    void approveOrder(Long orderId);
+    void rejectOrder(Long orderId);
 }

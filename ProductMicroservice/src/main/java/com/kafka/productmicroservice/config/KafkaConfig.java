@@ -1,6 +1,6 @@
 package com.kafka.productmicroservice.config;
 
-import com.kafka.core.event.ProductCreatedEvent;
+import com.kafka.core.event.ProductOrderedEvent;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +18,7 @@ import java.util.Map;
 @Configuration
 public class KafkaConfig {
 
-    @Autowired
+    /*@Autowired
     Environment environment;
 
     Map<String, Object> producerConfigs(){
@@ -38,13 +38,13 @@ public class KafkaConfig {
     }
 
     @Bean
-    ProducerFactory<String, ProductCreatedEvent> producerFactory(){
+    ProducerFactory<String, ProductOrderedEvent> producerFactory(){
         return new DefaultKafkaProducerFactory<>(producerConfigs());
-    }
+    }*/
 
     @Bean
-    KafkaTemplate<String, ProductCreatedEvent> kafkaTemplate(){
-        return new KafkaTemplate<String, ProductCreatedEvent>(producerFactory());
+    KafkaTemplate<String, Object> kafkaTemplate(ProducerFactory<String, Object> producerFactory) {
+        return new KafkaTemplate<>(producerFactory);
     }
 
     @Bean
@@ -53,6 +53,14 @@ public class KafkaConfig {
                 .partitions(3)
                 .replicas(3)
                 .configs(Map.of("min.insync.replicas","2")) // leader + 1 replica
+                .build();
+    }
+
+    @Bean
+    NewTopic createProductsEventsTopic() {
+        return TopicBuilder.name("products-events")
+                .partitions(3)
+                .replicas(3)
                 .build();
     }
 }

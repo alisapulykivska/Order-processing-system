@@ -1,16 +1,18 @@
 package com.kafka.ordermicroservice.config;
 
+import com.fasterxml.jackson.databind.deser.std.StringDeserializer;
 import com.kafka.core.event.OrderCreatedEvent;
 import org.apache.kafka.clients.admin.NewTopic;
+import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
+import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.config.TopicBuilder;
-import org.springframework.kafka.core.DefaultKafkaProducerFactory;
-import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.kafka.core.ProducerFactory;
+import org.springframework.kafka.core.*;
+import org.springframework.kafka.support.serializer.JsonDeserializer;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -18,7 +20,7 @@ import java.util.Map;
 @Configuration
 public class KafkaConfig {
 
-    @Autowired
+    /*@Autowired
     Environment environment;
 
     Map<String, Object> producerConfigs(){
@@ -38,21 +40,45 @@ public class KafkaConfig {
     }
 
     @Bean
-    ProducerFactory<String, OrderCreatedEvent> producerFactory(){
+    ProducerFactory<String, Object> producerFactory(){
         return new DefaultKafkaProducerFactory<>(producerConfigs());
+    }*/
+
+    @Bean
+    KafkaTemplate<String, Object> kafkaTemplate(ProducerFactory<String, Object> producerFactory) {
+        return new KafkaTemplate<>(producerFactory);
     }
 
     @Bean
-    KafkaTemplate<String, OrderCreatedEvent> kafkaTemplate(){
-        return new KafkaTemplate<String, OrderCreatedEvent>(producerFactory());
-    }
-
-    @Bean
-    NewTopic newTopic(){
-        return TopicBuilder.name("order-created-events-topic")
+    NewTopic createOrdersEventsTopic(){
+        return TopicBuilder.name("orders-events")
                 .partitions(3)
                 .replicas(3)
                 .configs(Map.of("min.insync.replicas","2")) // leader + 1 replica
+                .build();
+    }
+
+    @Bean
+    NewTopic createProductsCommandsTopic(){
+        return TopicBuilder.name("products-commands")
+                .partitions(3)
+                .replicas(3)
+                .configs(Map.of("min.insync.replicas","2")) // leader + 1 replica
+                .build();
+    }
+
+    @Bean
+    NewTopic createPaymentsCommandsTopic(){
+        return TopicBuilder.name("payments-commands")
+                .partitions(3)
+                .replicas(3)
+                .build();
+    }
+    @Bean
+    NewTopic createOrdersCommandsTopic() {
+        return TopicBuilder.name("orders-commands")
+                .partitions(3)
+                .replicas(3)
                 .build();
     }
 }
