@@ -17,3 +17,9 @@ OrderFlow is project to gain hands-on experience working with microservices arch
 - [ ] Metrics and observability: Prometheus, Grafana, additional valuable metrics for existing featuresd
 - [ ] CI/CD: Github Actions
 - [ ] Unit testing
+
+## Current order processing logic
+### Successful order processing
+![Sucessfull order processing](https://github.com/karmazinoleh/OrderFlow/blob/master/Screenshot%202025-07-28%20at%2017.28.04.png)
+### Unsuccessful order processing – payment exception
+![Unsuccessful order processing](https://github.com/karmazinoleh/OrderFlow/blob/master/Screenshot%202025-07-28%20at%2017.34.45.png)
