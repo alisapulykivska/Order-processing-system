@@ -1,5 +1,6 @@
 package com.kafka.ordermicroservice.service;
 
+import com.kafka.core.command.CreateOrderCommand;
 import com.kafka.core.event.OrderApprovedEvent;
 import com.kafka.core.event.OrderCreatedEvent;
 import com.kafka.core.types.OrderStatus;
@@ -7,9 +8,8 @@ import com.kafka.ordermicroservice.entity.Order;
 import com.kafka.ordermicroservice.entity.OrderItem;
 import com.kafka.ordermicroservice.repository.OrderItemRepository;
 import com.kafka.ordermicroservice.repository.OrderRepository;
-import com.kafka.ordermicroservice.service.dto.CreateOrderDto;
 
-import com.kafka.ordermicroservice.service.dto.OrderItemDto;
+import com.kafka.core.dto.OrderItemDto;
 import lombok.AllArgsConstructor;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.slf4j.Logger;
@@ -23,7 +23,6 @@ import org.springframework.util.Assert;
 import java.util.HashMap;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 
 @Service
 @AllArgsConstructor
@@ -34,12 +33,12 @@ public class OrderServiceImpl implements OrderService {
     private final OrderItemRepository orderItemRepository;
     private final OrderRepository orderRepository;
 
-    private Long createOrder(CreateOrderDto createOrderDto) {
+    private Long createOrder(CreateOrderCommand createOrderCommand) {
         Order order = new Order();
-        order.setUserId(createOrderDto.getUserId());
+        order.setUserId(createOrderCommand.getUserId());
         orderRepository.save(order);
 
-        for (OrderItemDto orderItemDto : createOrderDto.getOrderItems()) {
+        for (OrderItemDto orderItemDto : createOrderCommand.getOrderItems()) {
             OrderItem orderItem = new OrderItem();
             orderItem.setProductId(orderItemDto.getProductId());
             orderItem.setProductName(orderItemDto.getProductName());
@@ -54,18 +53,18 @@ public class OrderServiceImpl implements OrderService {
 
 
     @Transactional
-    public String createOrderAsync(CreateOrderDto createOrderDto) {
+    public String createOrderAsync(CreateOrderCommand createOrderCommand) {
 
-        Long orderId = createOrder(createOrderDto);
+        Long orderId = createOrder(createOrderCommand);
         HashMap<Long, Integer> products = new HashMap<>();
-        for(OrderItemDto orderItem : createOrderDto.getOrderItems()){
+        for(OrderItemDto orderItem : createOrderCommand.getOrderItems()){
             products.put(orderItem.getProductId(), orderItem.getQuantity());
         }
 
 
         OrderCreatedEvent orderCreatedEvent = new OrderCreatedEvent(
                 orderId,
-                createOrderDto.getUserId(),
+                createOrderCommand.getUserId(),
                 products
         );
 
@@ -94,7 +93,7 @@ public class OrderServiceImpl implements OrderService {
         return orderId.toString();
     }
 
-    @Transactional
+    /*@Transactional
     public String createOrderSync(CreateOrderDto createOrderDto) throws ExecutionException, InterruptedException {
 
         Long orderId = createOrder(createOrderDto);
@@ -131,7 +130,7 @@ public class OrderServiceImpl implements OrderService {
         LOGGER.info("Offset: {}", result.getRecordMetadata().offset());
 
         return orderId.toString();
-    }
+    }*/
 
     @Override
     public void approveOrder(Long orderId) {
