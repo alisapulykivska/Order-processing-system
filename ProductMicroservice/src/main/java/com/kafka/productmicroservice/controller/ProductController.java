@@ -4,6 +4,7 @@ package com.kafka.productmicroservice.controller;
 import com.kafka.productmicroservice.service.ProductService;
 import com.kafka.productmicroservice.service.ProductServiceImpl;
 import com.kafka.productmicroservice.service.dto.AddToCartDto;
+import com.kafka.productmicroservice.service.dto.CheckoutDto;
 import com.kafka.productmicroservice.service.dto.CreateProductDto;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -31,6 +32,12 @@ public class ProductController {
     public ResponseEntity<String> addToCart(@RequestBody AddToCartDto addToCartDto){
         String userId = productService.addToCart(addToCartDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(userId);
+    }
+
+    @PostMapping("/checkout")
+    public ResponseEntity<HttpStatus> checkout(@RequestBody CheckoutDto checkoutDto){
+        productService.checkout(checkoutDto);
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(HttpStatus.ACCEPTED);
     }
 
 }

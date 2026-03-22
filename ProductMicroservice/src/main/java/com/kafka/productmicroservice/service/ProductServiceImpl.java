@@ -1,5 +1,7 @@
 package com.kafka.productmicroservice.service;
 
+import com.kafka.core.command.CreateOrderCommand;
+import com.kafka.core.dto.OrderItemDto;
 import com.kafka.core.entity.ReservedProduct;
 import com.kafka.productmicroservice.entity.Cart;
 import com.kafka.productmicroservice.entity.CartItem;
@@ -7,10 +9,12 @@ import com.kafka.productmicroservice.entity.Product;
 import com.kafka.productmicroservice.repository.CartRepository;
 import com.kafka.productmicroservice.repository.ProductRepository;
 import com.kafka.productmicroservice.service.dto.AddToCartDto;
+import com.kafka.productmicroservice.service.dto.CheckoutDto;
 import com.kafka.productmicroservice.service.dto.CreateProductDto;
-import org.springframework.beans.BeanUtils;
 import lombok.AllArgsConstructor;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -21,6 +25,7 @@ import java.util.Optional;
 public class ProductServiceImpl implements ProductService {
     private final ProductRepository productRepository;
     private final CartRepository cartRepository;
+    private final KafkaTemplate<String, Object> kafkaTemplate;
 
     @Override
     public String createProductAsync(CreateProductDto createProductDto) {
@@ -62,40 +67,36 @@ public class ProductServiceImpl implements ProductService {
     }
 
     public String addToCart(AddToCartDto addToCartDto) {
-        Optional<Cart> optionalCart = cartRepository.findByUserId(addToCartDto.getUserId());
         Product product = productRepository.findById(addToCartDto.getProductId())
                 .orElseThrow(() -> new RuntimeException("Product not found"));
 
-        // todo: check if item is already in cart. If so -> add quantity.
+        Cart cart = cartRepository.findByUserId(addToCartDto.getUserId())
+                .orElseGet(() -> {
+                    Cart newCart = new Cart();
+                    newCart.setUserId(addToCartDto.getUserId());
+                    return newCart;
+                });
 
-        if (optionalCart.isPresent()) {
-            // if cart it present –> add additional cartItem to the cart
-            Cart cart = optionalCart.get();
+        // Check if product is already in cart, if so, update quantity
+        Optional<CartItem> existingItemOpt = cart.getCartItems().stream()
+                .filter(item -> item.getProduct().getId().equals(product.getId()))
+                .findFirst();
 
-            List<CartItem> cartItems = cart.getCartItems();
-            CartItem newCartItem = new CartItem();
-            newCartItem.setCart(cart);
-            newCartItem.setProduct(product);
-            newCartItem.setQuantity(addToCartDto.getQuantity());
-            cartItems.add(newCartItem);
-
-            cartRepository.save(cart);
+        if (existingItemOpt.isPresent()) {
+            CartItem existingItem = existingItemOpt.get();
+            existingItem.setQuantity(existingItem.getQuantity() + addToCartDto.getQuantity());
         } else {
-            // else -> create new cart and add cartItem to it
-            Cart cart = new Cart();
-            cart.setUserId(addToCartDto.getUserId());
-
-            CartItem newCartItem = new CartItem();
-            newCartItem.setProduct(product);
-            newCartItem.setCart(cart);
-            newCartItem.setQuantity(addToCartDto.getQuantity());
-
-            cart.setCartItems(List.of(newCartItem));
-
-            cartRepository.save(cart);
+            CartItem newItem = new CartItem();
+            newItem.setCart(cart);
+            newItem.setProduct(product);
+            newItem.setQuantity(addToCartDto.getQuantity());
+            cart.getCartItems().add(newItem);
         }
+
+        cartRepository.save(cart);
         return addToCartDto.getUserId().toString();
     }
+
 
     @Override
     public void cancelReservation(List<ReservedProduct> productsToCancel, Long orderId) {
@@ -104,6 +105,32 @@ public class ProductServiceImpl implements ProductService {
             product.setQuantity(product.getQuantity() + reservedProduct.getQuantity());
             productRepository.save(product);
         }
+    }
+
+    @Override
+    public void checkout(CheckoutDto checkoutDto) {
+        Cart cart = cartRepository.findByUserId(checkoutDto.getUserId())
+                .orElseThrow(() -> new RuntimeException("Cart not found"));
+        List<OrderItemDto> orderItems = cart.getCartItems().stream().map(item -> {
+            Product product = item.getProduct();
+            return new OrderItemDto(
+                    product.getId(),
+                    product.getTitle(),
+                    product.getPrice(),
+                    item.getQuantity()
+            );
+        }).toList();
+
+        CreateOrderCommand createOrderCommand = new CreateOrderCommand(checkoutDto.getUserId(), orderItems);
+        kafkaTemplate.send("orders-commands", createOrderCommand);
+    }
+
+    @Transactional
+    public void clearCart(Long userId) {
+        Cart cart = cartRepository.findByUserId(userId).orElseThrow(() ->
+                new RuntimeException("Cart not found for user " + userId));
+        cart.getCartItems().clear();
+        cartRepository.save(cart);
     }
 
 

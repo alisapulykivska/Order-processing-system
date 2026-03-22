@@ -1,6 +1,7 @@
 package com.kafka.productmicroservice.service.handler;
 
 import com.kafka.core.command.CancelProductReservationCommand;
+import com.kafka.core.command.ClearCartCommand;
 import com.kafka.core.command.ReserveProductCommand;
 import com.kafka.core.entity.ReservedProduct;
 import com.kafka.core.event.ProductReservationCancelledEvent;
@@ -67,5 +68,11 @@ public class ProductCommandsHandler {
         ProductReservationCancelledEvent productReservationCancelledEvent =
                 new ProductReservationCancelledEvent(productIds, command.getOrderId());
         kafkaTemplate.send("products-events", productReservationCancelledEvent);
+    }
+
+    @KafkaHandler
+    public void handleCommand(@Payload ClearCartCommand command){
+        log.info("Handling ClearCartCommand {}", command);
+        productService.clearCart(command.getUserId());
     }
 }

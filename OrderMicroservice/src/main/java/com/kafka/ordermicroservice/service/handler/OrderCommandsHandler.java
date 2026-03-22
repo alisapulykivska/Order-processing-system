@@ -1,6 +1,7 @@
 package com.kafka.ordermicroservice.service.handler;
 
 import com.kafka.core.command.ApproveOrderCommand;
+import com.kafka.core.command.CreateOrderCommand;
 import com.kafka.core.command.RejectOrderCommand;
 import com.kafka.ordermicroservice.service.OrderService;
 import lombok.AllArgsConstructor;
@@ -26,5 +27,9 @@ public class OrderCommandsHandler {
     public void handleCommand(@Payload RejectOrderCommand rejectOrderCommand) {
         log.info("Rejecting order");
         orderService.rejectOrder(rejectOrderCommand.getOrderId());
+    }
+    @KafkaHandler
+    public void handleCommand(@Payload CreateOrderCommand createOrderCommand){
+        orderService.createOrderAsync(createOrderCommand);
     }
 }

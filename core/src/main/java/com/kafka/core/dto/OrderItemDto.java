@@ -1,4 +1,4 @@
-package com.kafka.ordermicroservice.service.dto;
+package com.kafka.core.dto;
 
 import lombok.*;
 
