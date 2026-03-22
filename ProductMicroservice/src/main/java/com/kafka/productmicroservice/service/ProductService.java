@@ -14,4 +14,5 @@ public interface ProductService {
     String addToCart(AddToCartDto addToCartDto);
     void cancelReservation(List<ReservedProduct> products, Long orderId);
     void checkout(CheckoutDto checkoutDto);
+    void clearCart(Long orderId);
 }

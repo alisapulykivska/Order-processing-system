@@ -3,6 +3,7 @@ package com.kafka.ordermicroservice.saga;
 import com.kafka.core.command.*;
 import com.kafka.core.event.*;
 import com.kafka.core.types.OrderStatus;
+import com.kafka.ordermicroservice.repository.OrderRepository;
 import com.kafka.ordermicroservice.service.OrderHistoryService;
 import com.kafka.ordermicroservice.service.OrderHistoryServiceImpl;
 import lombok.AllArgsConstructor;
@@ -22,6 +23,7 @@ public class OrderSaga {
     private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
     private final KafkaTemplate<String, Object> kafkaTemplate;
     private final OrderHistoryService orderHistoryService;
+    private final OrderRepository orderRepository;
 
     @KafkaHandler
     public void handleEvent(@Payload OrderCreatedEvent event) {
@@ -52,6 +54,11 @@ public class OrderSaga {
         LOGGER.info("Received PaymentProcessedEvent {}", event);
         ApproveOrderCommand approveOrderCommand = new ApproveOrderCommand(event.getOrderId());
         kafkaTemplate.send("orders-commands", approveOrderCommand);
+
+        // inefficient way to get userId. I can just carry it all the way from the first request.
+        ClearCartCommand clearCartCommand = new ClearCartCommand(
+                orderRepository.findById(event.getOrderId()).get().getUserId());
+        kafkaTemplate.send("products-commands", clearCartCommand);
     }
 
     @KafkaHandler

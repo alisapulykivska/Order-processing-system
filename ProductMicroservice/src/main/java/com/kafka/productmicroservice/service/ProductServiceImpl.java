@@ -14,6 +14,7 @@ import com.kafka.productmicroservice.service.dto.CreateProductDto;
 import lombok.AllArgsConstructor;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -122,6 +123,14 @@ public class ProductServiceImpl implements ProductService {
 
         CreateOrderCommand createOrderCommand = new CreateOrderCommand(checkoutDto.getUserId(), orderItems);
         kafkaTemplate.send("orders-commands", createOrderCommand);
+    }
+
+    @Transactional
+    public void clearCart(Long userId) {
+        Cart cart = cartRepository.findByUserId(userId).orElseThrow(() ->
+                new RuntimeException("Cart not found for user " + userId));
+        cart.getCartItems().clear();
+        cartRepository.save(cart);
     }
 
 
