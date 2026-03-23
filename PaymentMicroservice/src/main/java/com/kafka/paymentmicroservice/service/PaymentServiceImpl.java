@@ -25,8 +25,8 @@ public class PaymentServiceImpl implements PaymentService {
     public Payment process(List<ReservedProduct> products, Long orderId) {
         BigDecimal totalPrice = BigDecimal.ZERO;
         for (ReservedProduct product : products) {
-            totalPrice = totalPrice.add(product.getPrice()
-                    .multiply(new BigDecimal(product.getQuantity())));
+            totalPrice = totalPrice.add(product.price()
+                    .multiply(new BigDecimal(product.quantity())));
         }
 
         log.info("Processed payment");
