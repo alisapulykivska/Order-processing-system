@@ -22,6 +22,6 @@ public class ShippingController {
         log.info("Received request: {}", getDistanceDto);
         Random rand = new Random();
         int dist = rand.nextInt(500);
-        return ResponseEntity.ok().body(new DistanceResponse(dist));
+        return ResponseEntity.ok().body(null);
     }
 }

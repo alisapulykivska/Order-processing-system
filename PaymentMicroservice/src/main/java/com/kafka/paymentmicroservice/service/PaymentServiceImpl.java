@@ -54,10 +54,4 @@ public class PaymentServiceImpl implements PaymentService {
         processedPayment.setId(paymentEntity.getId());
         return processedPayment;
     }
-
-    /*@Override
-    public List<Payment> findAll() {
-        return paymentRepository.findAll().stream().map(entity -> new Payment(entity.getId(), entity.getOrderId(), entity.getProductId(), entity.getProductPrice(), entity.getProductQuantity())
-        ).collect(Collectors.toList());
-    }*/
 }

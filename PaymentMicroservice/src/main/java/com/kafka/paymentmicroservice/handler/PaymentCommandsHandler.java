@@ -35,20 +35,11 @@ public class PaymentCommandsHandler {
             PaymentProcessedEvent paymentProcessedEvent = new PaymentProcessedEvent(processedPayment.getOrderId(),
                     processedPayment.getId());
             kafkaTemplate.send("payments-events", paymentProcessedEvent);
-        } catch (CreditCardProcessorUnavailableException e) {
-            logger.error(e.getLocalizedMessage(), e);
+        } catch (IllegalArgumentException e) {
+            logger.error("Payment processing failed", e);
             PaymentFailedEvent paymentFailedEvent = new PaymentFailedEvent(command.orderId(),
                     command.reservedProducts());
             kafkaTemplate.send("payments-events",paymentFailedEvent);
         }
     }
-    /*
-    //Used when testing compensation transaction
-    @KafkaHandler
-    public void handleCommand(@Payload ProcessPaymentCommand command) {
-        logger.info("Sending payment failed");
-        PaymentFailedEvent paymentFailedEvent = new PaymentFailedEvent(command.getOrderId(),
-                    command.getReservedProducts());
-        kafkaTemplate.send("payments-events",paymentFailedEvent);
-    }*/
 }
