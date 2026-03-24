@@ -3,31 +3,47 @@ package com.kafka.paymentmicroservice.service;
 import com.kafka.core.entity.ReservedProduct;
 import com.kafka.paymentmicroservice.entity.Payment;
 import com.kafka.paymentmicroservice.repository.PaymentRepository;
-import lombok.AllArgsConstructor;
+import com.kafka.paymentmicroservice.service.dto.Distance;
+import com.kafka.paymentmicroservice.service.dto.GetDistanceDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
+import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClient;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Optional;
+
+import static org.springframework.http.MediaType.APPLICATION_JSON;
 
 @Service
-@AllArgsConstructor
 public class PaymentServiceImpl implements PaymentService {
-    //public static final String SAMPLE_CREDIT_CARD_NUMBER = "374245455400126";
     private static final Logger log = LoggerFactory.getLogger(PaymentServiceImpl.class);
     private final PaymentRepository paymentRepository;
+    private final RestClient restClient;
+
+    public PaymentServiceImpl(PaymentRepository paymentRepository, RestClient.Builder builder) {
+        this.paymentRepository = paymentRepository;
+        this.restClient = builder.baseUrl("http://localhost:10000/shipping/").build();
+    }
+    private final BigDecimal pricePerKm = BigDecimal.valueOf(0.45);
 
     @Override
     public Payment process(List<ReservedProduct> products, Long orderId) {
-        BigDecimal totalPrice = BigDecimal.ZERO;
-        for (ReservedProduct product : products) {
-            totalPrice = totalPrice.add(product.getPrice()
-                    .multiply(new BigDecimal(product.getQuantity())));
-        }
+        BigDecimal totalPrice = products.stream()
+                .map(product -> product.price()
+                        .multiply(BigDecimal.valueOf(product.quantity())))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        GetDistanceDto getDistanceDto = new GetDistanceDto("SomePointA", "SomePointB");
+        Distance distance = Optional.ofNullable(restClient.method(HttpMethod.GET).body(getDistanceDto)
+                .accept(APPLICATION_JSON)
+                .retrieve()
+                .body(Distance.class)).orElseThrow(() -> new IllegalArgumentException("Distance service returned null"));
+
+        totalPrice = totalPrice.add(pricePerKm.multiply(BigDecimal.valueOf(distance.distance())));
 
         log.info("Processed payment");
         Payment paymentEntity = new Payment(orderId, totalPrice);
@@ -38,10 +54,4 @@ public class PaymentServiceImpl implements PaymentService {
         processedPayment.setId(paymentEntity.getId());
         return processedPayment;
     }
-
-    /*@Override
-    public List<Payment> findAll() {
-        return paymentRepository.findAll().stream().map(entity -> new Payment(entity.getId(), entity.getOrderId(), entity.getProductId(), entity.getProductPrice(), entity.getProductQuantity())
-        ).collect(Collectors.toList());
-    }*/
 }

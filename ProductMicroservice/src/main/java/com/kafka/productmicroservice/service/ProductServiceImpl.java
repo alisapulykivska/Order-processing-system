@@ -30,11 +30,11 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public String createProductAsync(CreateProductDto createProductDto) {
         Product product = new Product().builder()
-                .title(createProductDto.getTitle())
-                .price(createProductDto.getPrice())
-                .quantity(createProductDto.getQuantity())
+                .title(createProductDto.title())
+                .price(createProductDto.price())
+                .quantity(createProductDto.quantity())
                 .createdOn(LocalDateTime.now())
-                .ownerId(createProductDto.getOwnerId())
+                .ownerId(createProductDto.ownerId())
                 .build();
 
         /*
@@ -67,13 +67,13 @@ public class ProductServiceImpl implements ProductService {
     }
 
     public String addToCart(AddToCartDto addToCartDto) {
-        Product product = productRepository.findById(addToCartDto.getProductId())
+        Product product = productRepository.findById(addToCartDto.productId())
                 .orElseThrow(() -> new RuntimeException("Product not found"));
 
-        Cart cart = cartRepository.findByUserId(addToCartDto.getUserId())
+        Cart cart = cartRepository.findByUserId(addToCartDto.userId())
                 .orElseGet(() -> {
                     Cart newCart = new Cart();
-                    newCart.setUserId(addToCartDto.getUserId());
+                    newCart.setUserId(addToCartDto.userId());
                     return newCart;
                 });
 
@@ -84,32 +84,32 @@ public class ProductServiceImpl implements ProductService {
 
         if (existingItemOpt.isPresent()) {
             CartItem existingItem = existingItemOpt.get();
-            existingItem.setQuantity(existingItem.getQuantity() + addToCartDto.getQuantity());
+            existingItem.setQuantity(existingItem.getQuantity() + addToCartDto.quantity());
         } else {
             CartItem newItem = new CartItem();
             newItem.setCart(cart);
             newItem.setProduct(product);
-            newItem.setQuantity(addToCartDto.getQuantity());
+            newItem.setQuantity(addToCartDto.quantity());
             cart.getCartItems().add(newItem);
         }
 
         cartRepository.save(cart);
-        return addToCartDto.getUserId().toString();
+        return addToCartDto.userId().toString();
     }
 
 
     @Override
     public void cancelReservation(List<ReservedProduct> productsToCancel, Long orderId) {
         for(ReservedProduct reservedProduct : productsToCancel) {
-            Product product = productRepository.findById(reservedProduct.getProductId()).orElseThrow();
-            product.setQuantity(product.getQuantity() + reservedProduct.getQuantity());
+            Product product = productRepository.findById(reservedProduct.productId()).orElseThrow();
+            product.setQuantity(product.getQuantity() + reservedProduct.quantity());
             productRepository.save(product);
         }
     }
 
     @Override
     public void checkout(CheckoutDto checkoutDto) {
-        Cart cart = cartRepository.findByUserId(checkoutDto.getUserId())
+        Cart cart = cartRepository.findByUserId(checkoutDto.userId())
                 .orElseThrow(() -> new RuntimeException("Cart not found"));
         List<OrderItemDto> orderItems = cart.getCartItems().stream().map(item -> {
             Product product = item.getProduct();
@@ -121,7 +121,7 @@ public class ProductServiceImpl implements ProductService {
             );
         }).toList();
 
-        CreateOrderCommand createOrderCommand = new CreateOrderCommand(checkoutDto.getUserId(), orderItems);
+        CreateOrderCommand createOrderCommand = new CreateOrderCommand(checkoutDto.userId(), orderItems);
         kafkaTemplate.send("orders-commands", createOrderCommand);
     }
 

@@ -35,15 +35,15 @@ public class OrderServiceImpl implements OrderService {
 
     private Long createOrder(CreateOrderCommand createOrderCommand) {
         Order order = new Order();
-        order.setUserId(createOrderCommand.getUserId());
+        order.setUserId(createOrderCommand.userId());
         orderRepository.save(order);
 
-        for (OrderItemDto orderItemDto : createOrderCommand.getOrderItems()) {
+        for (OrderItemDto orderItemDto : createOrderCommand.orderItems()) {
             OrderItem orderItem = new OrderItem();
-            orderItem.setProductId(orderItemDto.getProductId());
-            orderItem.setProductName(orderItemDto.getProductName());
-            orderItem.setProductPrice(orderItemDto.getProductPrice());
-            orderItem.setQuantity(orderItemDto.getQuantity());
+            orderItem.setProductId(orderItemDto.productId());
+            orderItem.setProductName(orderItemDto.productName());
+            orderItem.setProductPrice(orderItemDto.productPrice());
+            orderItem.setQuantity(orderItemDto.quantity());
             orderItem.setOrder(order);
 
             orderItemRepository.save(orderItem);
@@ -57,14 +57,14 @@ public class OrderServiceImpl implements OrderService {
 
         Long orderId = createOrder(createOrderCommand);
         HashMap<Long, Integer> products = new HashMap<>();
-        for(OrderItemDto orderItem : createOrderCommand.getOrderItems()){
-            products.put(orderItem.getProductId(), orderItem.getQuantity());
+        for(OrderItemDto orderItem : createOrderCommand.orderItems()){
+            products.put(orderItem.productId(), orderItem.quantity());
         }
 
 
         OrderCreatedEvent orderCreatedEvent = new OrderCreatedEvent(
                 orderId,
-                createOrderCommand.getUserId(),
+                createOrderCommand.userId(),
                 products
         );
 

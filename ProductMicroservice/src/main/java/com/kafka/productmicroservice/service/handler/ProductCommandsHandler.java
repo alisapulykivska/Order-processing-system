@@ -37,23 +37,23 @@ public class ProductCommandsHandler {
         try {
             List<ReservedProduct> reservedProducts = new ArrayList<>();
             log.info("Handling ReserveProductCommand {}", command);
-            for(Map.Entry entry : command.getProducts().entrySet()) {
+            for(Map.Entry entry : command.products().entrySet()) {
                 Long productId = (Long) entry.getKey();
                 Integer quantity = (Integer) entry.getValue();
 
                 Product desiredProduct = new Product(productId, quantity);
-                ReservedProduct reservedProduct = productService.reserve(desiredProduct, command.getOrderId());
+                ReservedProduct reservedProduct = productService.reserve(desiredProduct, command.orderId());
 
                 log.info("Reserving product {}", productId);
                 reservedProducts.add(reservedProduct);
             }
-            ProductReservedEvent productReservedEvent = new ProductReservedEvent(command.getOrderId(), reservedProducts);
+            ProductReservedEvent productReservedEvent = new ProductReservedEvent(command.orderId(), reservedProducts);
             kafkaTemplate.send("products-events", productReservedEvent);
         } catch (Exception e){
             log.info("Exception!");
             log.error(e.getMessage());
             ProductReservationFailedEvent productReservationFailedEvent = new ProductReservationFailedEvent(
-                    command.getOrderId(), command.getProducts());
+                    command.orderId(), command.products());
             kafkaTemplate.send("products-events", productReservationFailedEvent);
         }
     }
@@ -61,18 +61,18 @@ public class ProductCommandsHandler {
     @KafkaHandler
     public void handleCommand(@Payload CancelProductReservationCommand command){
         log.info("Handling CancelProductReservationCommand {}", command);
-        productService.cancelReservation(command.getProducts(), command.getOrderId());
-        List<Long> productIds = command.getProducts().stream().map(ReservedProduct::getProductId)
+        productService.cancelReservation(command.products(), command.orderId());
+        List<Long> productIds = command.products().stream().map(ReservedProduct::productId)
                 .collect(Collectors.toList());
 
         ProductReservationCancelledEvent productReservationCancelledEvent =
-                new ProductReservationCancelledEvent(productIds, command.getOrderId());
+                new ProductReservationCancelledEvent(productIds, command.orderId());
         kafkaTemplate.send("products-events", productReservationCancelledEvent);
     }
 
     @KafkaHandler
     public void handleCommand(@Payload ClearCartCommand command){
         log.info("Handling ClearCartCommand {}", command);
-        productService.clearCart(command.getUserId());
+        productService.clearCart(command.userId());
     }
 }

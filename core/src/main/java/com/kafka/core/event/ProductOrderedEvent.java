@@ -1,19 +1,5 @@
 package com.kafka.core.event;
 
-import lombok.*;
-
 import java.math.BigDecimal;
 
-@Data
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-public class ProductOrderedEvent {
-
-    private String orderId;
-    private String title;
-    private BigDecimal price;
-    private Integer quantity;
-
-}
+public record ProductOrderedEvent(String orderId, String title, BigDecimal price, Integer quantity) {}
