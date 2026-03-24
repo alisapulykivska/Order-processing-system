@@ -6,7 +6,6 @@ import com.kafka.ordermicroservice.repository.OrderHistoryRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.security.Timestamp;
 import java.time.LocalDateTime;
 
 @Service
