@@ -5,9 +5,9 @@ OrderFlow is project to gain hands-on experience working with microservices arch
 - [x] Kafka configuration (topics, async/sync events)
 - [x] Cart and additon to cart
 - [x] SAGA Orchestration + Compensating transactions
+- [x] Validation of DTOs on endpoints
 
 ### 📝 Planned to be implemented:
-- [ ] Validating of DTOs
 - [ ] More custom exceptions
 - [ ] Delete CartItems from Cart
 - [ ] CRUD for products
