@@ -1,4 +1,4 @@
-package com.kafka.core.advice;
+package com.kafka.productmicroservice.advice;
 
 import com.kafka.core.exception.ErrorResponse;
 import org.springframework.http.HttpStatus;
