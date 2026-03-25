@@ -3,6 +3,9 @@ package com.kafka.productmicroservice.service;
 import com.kafka.core.command.CreateOrderCommand;
 import com.kafka.core.dto.OrderItemDto;
 import com.kafka.core.entity.ReservedProduct;
+import com.kafka.core.exception.CartNotFoundException;
+import com.kafka.core.exception.InsufficientProductQuantityException;
+import com.kafka.core.exception.ProductNotFoundException;
 import com.kafka.productmicroservice.entity.Cart;
 import com.kafka.productmicroservice.entity.CartItem;
 import com.kafka.productmicroservice.entity.Product;
@@ -52,8 +55,7 @@ public class ProductServiceImpl implements ProductService {
         // todo: reservation system
         Product productEntity = productRepository.findById(desiredProduct.getId()).orElseThrow();
         if (desiredProduct.getQuantity() > productEntity.getQuantity()) {
-            //throw new ProductInsufficientQuantityException(productEntity.getId(), orderId);
-            throw new RuntimeException(productEntity.getId() + "–" + orderId);
+            throw new InsufficientProductQuantityException(productEntity.getId(), orderId);
         }
 
         productEntity.setQuantity(productEntity.getQuantity() - desiredProduct.getQuantity());
@@ -68,7 +70,7 @@ public class ProductServiceImpl implements ProductService {
 
     public String addToCart(AddToCartDto addToCartDto) {
         Product product = productRepository.findById(addToCartDto.productId())
-                .orElseThrow(() -> new RuntimeException("Product not found"));
+                .orElseThrow(() -> new ProductNotFoundException(addToCartDto.productId()));
 
         Cart cart = cartRepository.findByUserId(addToCartDto.userId())
                 .orElseGet(() -> {
@@ -110,7 +112,8 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public void checkout(CheckoutDto checkoutDto) {
         Cart cart = cartRepository.findByUserId(checkoutDto.userId())
-                .orElseThrow(() -> new RuntimeException("Cart not found"));
+                .orElseThrow(() -> new CartNotFoundException(checkoutDto.userId()));
+
         List<OrderItemDto> orderItems = cart.getCartItems().stream().map(item -> {
             Product product = item.getProduct();
             return new OrderItemDto(
@@ -128,7 +131,7 @@ public class ProductServiceImpl implements ProductService {
     @Transactional
     public void clearCart(Long userId) {
         Cart cart = cartRepository.findByUserId(userId).orElseThrow(() ->
-                new RuntimeException("Cart not found for user " + userId));
+                new CartNotFoundException(userId));
         cart.getCartItems().clear();
         cartRepository.save(cart);
     }
