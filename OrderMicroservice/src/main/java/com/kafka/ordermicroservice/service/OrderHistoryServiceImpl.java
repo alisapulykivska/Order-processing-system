@@ -15,6 +15,7 @@ public class OrderHistoryServiceImpl implements OrderHistoryService {
 
     @Override
     public void add(Long orderId, OrderStatus orderStatus) {
+        // exceptions?
         OrderHistory entity = new OrderHistory();
         entity.setOrderId(orderId);
         entity.setStatus(orderStatus);

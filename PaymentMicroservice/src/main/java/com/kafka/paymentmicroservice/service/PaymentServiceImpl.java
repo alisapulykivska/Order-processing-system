@@ -1,6 +1,7 @@
 package com.kafka.paymentmicroservice.service;
 
 import com.kafka.core.entity.ReservedProduct;
+import com.kafka.core.exception.payment.ShippingServiceException;
 import com.kafka.paymentmicroservice.entity.Payment;
 import com.kafka.paymentmicroservice.repository.PaymentRepository;
 import com.kafka.paymentmicroservice.service.dto.Distance;
@@ -41,7 +42,7 @@ public class PaymentServiceImpl implements PaymentService {
         Distance distance = Optional.ofNullable(restClient.method(HttpMethod.GET).body(getDistanceDto)
                 .accept(APPLICATION_JSON)
                 .retrieve()
-                .body(Distance.class)).orElseThrow(() -> new IllegalArgumentException("Distance service returned null"));
+                .body(Distance.class)).orElseThrow(() -> new ShippingServiceException("Distance is null"));
 
         totalPrice = totalPrice.add(pricePerKm.multiply(BigDecimal.valueOf(distance.distance())));
 

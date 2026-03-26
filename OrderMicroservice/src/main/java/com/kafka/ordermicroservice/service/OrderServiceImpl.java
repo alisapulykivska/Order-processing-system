@@ -3,6 +3,8 @@ package com.kafka.ordermicroservice.service;
 import com.kafka.core.command.CreateOrderCommand;
 import com.kafka.core.event.OrderApprovedEvent;
 import com.kafka.core.event.OrderCreatedEvent;
+import com.kafka.core.exception.order.OrderCreationException;
+import com.kafka.core.exception.order.OrderNotFoundException;
 import com.kafka.core.types.OrderStatus;
 import com.kafka.ordermicroservice.entity.Order;
 import com.kafka.ordermicroservice.entity.OrderItem;
@@ -81,6 +83,7 @@ public class OrderServiceImpl implements OrderService {
         future.whenComplete((result, exception) -> {
             if (exception != null) {
                 LOGGER.error(exception.getMessage());
+                throw new OrderCreationException("Failed to send order created event", exception);
             } else {
                 LOGGER.info("Topic: {}", result.getRecordMetadata().topic());
                 LOGGER.info("Partition: {}", result.getRecordMetadata().partition());
@@ -134,8 +137,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public void approveOrder(Long orderId) {
-        Order order = orderRepository.findById(orderId).orElse(null);
-        Assert.notNull(order, "No order is found with id " + orderId);
+        Order order = orderRepository.findById(orderId).orElseThrow(() -> new OrderNotFoundException(orderId));
         order.setStatus(OrderStatus.APPROVED);
         orderRepository.save(order);
         OrderApprovedEvent orderApprovedEvent = new OrderApprovedEvent(orderId);
@@ -144,8 +146,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public void rejectOrder(Long orderId) {
-        Order order = orderRepository.findById(orderId).orElse(null);
-        Assert.notNull(order, "No order is found with id " + orderId);
+        Order order = orderRepository.findById(orderId).orElseThrow(() -> new OrderNotFoundException(orderId));
         order.setStatus(OrderStatus.REJECTED);
         orderRepository.save(order);
     }
