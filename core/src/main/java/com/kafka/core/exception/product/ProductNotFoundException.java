@@ -1,4 +1,4 @@
-package com.kafka.core.exception;
+package com.kafka.core.exception.product;
 
 public class ProductNotFoundException extends RuntimeException {
 
