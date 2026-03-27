@@ -3,17 +3,20 @@ package com.kafka.productmicroservice.service;
 import com.kafka.core.command.CreateOrderCommand;
 import com.kafka.core.dto.OrderItemDto;
 import com.kafka.core.entity.ReservedProduct;
+import com.kafka.core.exception.product.CartItemNotFoundException;
 import com.kafka.core.exception.product.CartNotFoundException;
 import com.kafka.core.exception.product.InsufficientProductQuantityException;
 import com.kafka.core.exception.product.ProductNotFoundException;
 import com.kafka.productmicroservice.entity.Cart;
 import com.kafka.productmicroservice.entity.CartItem;
 import com.kafka.productmicroservice.entity.Product;
+import com.kafka.productmicroservice.repository.CartItemRepository;
 import com.kafka.productmicroservice.repository.CartRepository;
 import com.kafka.productmicroservice.repository.ProductRepository;
 import com.kafka.productmicroservice.service.dto.AddToCartDto;
 import com.kafka.productmicroservice.service.dto.CheckoutDto;
 import com.kafka.productmicroservice.service.dto.CreateProductDto;
+import com.kafka.productmicroservice.service.dto.RemoveFromCartDto;
 import lombok.AllArgsConstructor;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
@@ -28,6 +31,7 @@ import java.util.Optional;
 public class ProductServiceImpl implements ProductService {
     private final ProductRepository productRepository;
     private final CartRepository cartRepository;
+    private final CartItemRepository cartItemRepository;
     private final KafkaTemplate<String, Object> kafkaTemplate;
 
     @Override
@@ -99,6 +103,25 @@ public class ProductServiceImpl implements ProductService {
         return addToCartDto.userId().toString();
     }
 
+    @Override
+    public void removeProductFromCart(RemoveFromCartDto removeFromCartDto) {
+        Product product = productRepository.findById(removeFromCartDto.productId())
+                .orElseThrow(() -> new ProductNotFoundException(removeFromCartDto.productId()));
+
+        Cart cart = cartRepository.findByUserId(removeFromCartDto.userId())
+                .orElseThrow(( ) -> new CartNotFoundException(removeFromCartDto.userId()));
+
+        Optional<CartItem> existingItemOpt = cart.getCartItems().stream()
+                .filter(item -> item.getProduct().getId().equals(product.getId()))
+                .findFirst();
+
+        if (existingItemOpt.isPresent()) {
+            cart.getCartItems().remove(existingItemOpt.get());
+            cartRepository.save(cart);
+        } else {
+            throw new CartItemNotFoundException(removeFromCartDto.productId(), removeFromCartDto.userId());
+        }
+    }
 
     @Override
     public void cancelReservation(List<ReservedProduct> productsToCancel, Long orderId) {
