@@ -6,9 +6,9 @@ OrderFlow is project to gain hands-on experience working with microservices arch
 - [x] Cart and additon to cart
 - [x] SAGA Orchestration + Compensating transactions
 - [x] Validation of DTOs on endpoints
+- [x] Custom exceptions for every microservice
 
 ### 📝 Planned to be implemented:
-- [ ] More custom exceptions
 - [ ] Delete CartItems from Cart
 - [ ] CRUD for products
 - [ ] LogisticsMicroservice with the shiping/delivery logic
