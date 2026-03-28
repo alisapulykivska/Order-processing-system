@@ -3,20 +3,21 @@ OrderFlow is project to gain hands-on experience working with microservices arch
 
 ### ✅ The following features are currently implemented: 
 - [x] Kafka configuration (topics, async/sync events)
-- [x] Cart and additon to cart
+- [x] Cart with products
 - [x] SAGA Orchestration + Compensating transactions
 - [x] Validation of DTOs on endpoints
 - [x] Custom exceptions for every microservice
 
 ### 📝 Planned to be implemented:
-- [ ] Delete CartItems from Cart
-- [ ] CRUD for products
+- [ ] CRUD for products, users, orders
+- [ ] Authorization, Authentication, Security with Keycloak
+- [ ] API Gateway with Spring Cloud
+- [ ] InventoryMicroservice with sync (HTTP) requests using Spring Cloud
+- [ ] Admin webpage using Angular
 - [ ] LogisticsMicroservice with the shiping/delivery logic
 - [ ] Email notifications via NotificationMicroservice
-- [ ] User logic: Authorization, Authentication, Security (JPA tokens)
-- [ ] Metrics and observability: Prometheus, Grafana, additional valuable metrics for existing featuresd
+- [ ] Metrics and observability: Prometheus and Grafana
 - [ ] CI/CD: Github Actions
-- [ ] Unit testing
 
 ## Current order processing logic
 ### Successful order processing
