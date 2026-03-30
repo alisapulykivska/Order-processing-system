@@ -3,6 +3,7 @@ package com.kafka.usermicroservice.service;
 import jakarta.ws.rs.core.Response;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.RealmResource;
+import org.keycloak.admin.client.resource.UserResource;
 import org.keycloak.admin.client.resource.UsersResource;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
@@ -45,6 +46,15 @@ public class UserService {
         if (response.getStatus() != 201) {
             throw new RuntimeException("Failed : HTTP error code : " + response.getStatus());
         }
+    }
+
+    private UsersResource getUsersResource() {
+        RealmResource realmResource = keycloak.realm(realm);
+        return realmResource.users();
+    }
+
+    public UserRepresentation getUserById(String userId){
+        return getUsersResource().get(userId).toRepresentation();
     }
 
 }
