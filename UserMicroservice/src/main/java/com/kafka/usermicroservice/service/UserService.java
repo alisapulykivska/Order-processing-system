@@ -54,7 +54,7 @@ public class UserService {
     }
 
     public UserRepresentation getUserById(String userId){
-        return getUsersResource().get(userId).toRepresentation(); // check for errors, return nice-looking message
+        return getUsersResource().get(userId).toRepresentation();
     }
 
     public void deleteUserById(String userId){
