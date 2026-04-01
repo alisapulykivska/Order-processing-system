@@ -1,0 +1,21 @@
+server:
+  port: 8081
+
+spring:
+  cloud:
+    gateway:
+      server:
+        webflux:
+          routes:
+            - id: user-service
+              uri: http://localhost:20000
+              predicates:
+                - Path=/api/auth/**
+            - id: product-service
+              uri: http://localhost:20001
+              predicates:
+                - Path=/product/**
+
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG
