@@ -16,6 +16,13 @@ spring:
               predicates:
                 - Path=/product/**
 
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8080/realms/orderflow
+          jwk-set-uri: http://localhost:8080/realms/orderflow/protocol/openid-connect/certs
+
 logging:
   level:
     org.springframework.cloud.gateway: DEBUG
