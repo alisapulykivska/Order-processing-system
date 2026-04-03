@@ -1,0 +1,27 @@
+<div class="p-4">
+  <h2 class="text-xl font-bold mb-4">User List</h2>
+  <table class="min-w-full border border-gray-300">
+    <thead class="bg-gray-200">
+      <tr>
+        <th class="p-2 border">ID</th>
+        <th class="p-2 border">Name</th>
+        <th class="p-2 border">Email</th>
+        <th class="p-2 border">Role</th>
+        <th class="p-2 border">Actions</th>
+      </tr>
+     </thead>
+        <tbody>
+            <tr *ngFor="let user of users">
+                <td class="p-2 border">{{ user.id }}</td>
+                <td class="p-2 border">{{ user.name }}</td>
+                <td class="p-2 border">{{ user.email }}</td>
+                <td class="p-2 border">{{ user.role }}</td>
+                <td class="p-2 border space-x-2">
+                <button (click)="details(user)" class="bg-blue-500 text-white px-2 py-1 rounded">Details</button>
+                <button (click)="edit(user)" class="bg-yellow-500 text-white px-2 py-1 rounded">Edit</button>
+                <button (click)="delete(user)" class="bg-red-500 text-white px-2 py-1 rounded">Delete</button>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
