@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { UserTableComponent } from "../user-table/user-table.component";
+import { ProductTableComponent } from "../product-table/product-table.component";
 
 class User {
   id: number;
@@ -17,7 +18,7 @@ class User {
 
 @Component({
   selector: 'app-admin-panel',
-  imports: [UserTableComponent],
+  imports: [UserTableComponent, ProductTableComponent],
   templateUrl: './admin-panel.component.html',
   styleUrl: './admin-panel.component.scss'
 })
