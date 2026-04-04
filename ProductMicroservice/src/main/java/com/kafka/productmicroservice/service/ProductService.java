@@ -17,4 +17,5 @@ public interface ProductService {
     void checkout(CheckoutDto checkoutDto);
     void clearCart(Long orderId);
     void removeProductFromCart(RemoveFromCartDto removeFromCartDto);
+    List<Product> getAllProducts();
 }
