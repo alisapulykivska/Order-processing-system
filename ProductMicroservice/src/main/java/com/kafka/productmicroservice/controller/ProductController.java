@@ -27,7 +27,7 @@ import java.util.List;
 public class ProductController {
     private final ProductService productService;
 
-    //@PreAuthorize("hasRole('admin')")
+    @PreAuthorize("hasRole('admin')")
     @PostMapping
     public ResponseEntity<String> createProductAsync(@Valid @RequestBody CreateProductDto createProductDto){
         String productId = productService.createProductAsync(createProductDto);

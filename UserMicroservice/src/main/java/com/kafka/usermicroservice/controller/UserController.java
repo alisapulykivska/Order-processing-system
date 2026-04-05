@@ -43,7 +43,8 @@ public class UserController {
         return ResponseEntity.ok(userService.getUserById(id));
     }
 
-    @GetMapping
+    @PreAuthorize("hasRole('admin')")
+    @GetMapping("/")
     public ResponseEntity<List<UserResponse>> findAllUsers() {
         return ResponseEntity.ok(userService.getAllUsers()); // todo: add pageable
     }
