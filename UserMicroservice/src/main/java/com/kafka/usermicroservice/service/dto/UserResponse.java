@@ -1,5 +1,8 @@
 package com.kafka.usermicroservice.service.dto;
 
-public record UsersResponce (String username, String email) {
+import java.util.List;
+import java.util.Map;
+
+public record UserResponse(String username, String email) {
 }
 

@@ -15,19 +15,15 @@
   <table>
     <thead>
       <tr>
-        <th >ID</th>
-        <th>Name</th>
+        <th>Username</th>
         <th>Email</th>
-        <th>Role</th>
         <th>Actions</th>
       </tr>
      </thead>
         <tbody>
             <tr *ngFor="let user of users">
-                <td>{{ user.id }}</td>
-                <td>{{ user.name }}</td>
+                <td>{{ user.username }}</td>
                 <td>{{ user.email }}</td>
-                <td>{{ user.role }}</td>
                 <td>
                 <button (click)="details(user)">Details</button>
                 <button (click)="edit(user)">Edit</button>
