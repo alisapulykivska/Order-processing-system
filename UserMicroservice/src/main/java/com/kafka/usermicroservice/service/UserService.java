@@ -1,9 +1,9 @@
 package com.kafka.usermicroservice.service;
 
+import com.kafka.usermicroservice.service.dto.UserResponse;
 import jakarta.ws.rs.core.Response;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.RealmResource;
-import org.keycloak.admin.client.resource.UserResource;
 import org.keycloak.admin.client.resource.UsersResource;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
@@ -59,6 +59,14 @@ public class UserService {
 
     public void deleteUserById(String userId){
         getUsersResource().delete(userId);
+    }
+
+    public List<UserResponse> getAllUsers() {
+        List<UserRepresentation> users = getUsersResource().list();
+
+        return users.stream()
+                .map(u -> new UserResponse(u.getUsername(), u.getEmail()))
+                .toList();
     }
 
 }

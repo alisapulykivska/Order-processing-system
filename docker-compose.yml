@@ -1,0 +1,17 @@
+version: "3.9"
+
+services:
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.3.2
+    command:
+      - start-dev
+      - --spi-export-realm-enabled=true
+      - --spi-export-realm-name=*
+      - --spi-export-realm-file=/opt/keycloak/data/export/realms.json
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+    ports:
+      - "127.0.0.1:8080:8080"
+    volumes:
+      - ./keycloak-data:/opt/keycloak/data

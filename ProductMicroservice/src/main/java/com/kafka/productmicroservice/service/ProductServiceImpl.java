@@ -159,5 +159,7 @@ public class ProductServiceImpl implements ProductService {
         cartRepository.save(cart);
     }
 
-
+    public List<Product> getAllProducts(){
+        return productRepository.findAll();
+    }
 }
