@@ -43,6 +43,12 @@ public class UserController {
         return ResponseEntity.ok(userService.getUserById(id));
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<UserRepresentation> updateUser(@PathVariable String id, @RequestBody UserDto user) {
+        return ResponseEntity.ok(userService.updateUser(id, user));
+
+    }
+
     @PreAuthorize("hasRole('admin')")
     @GetMapping("/")
     public ResponseEntity<List<UserResponse>> findAllUsers() {

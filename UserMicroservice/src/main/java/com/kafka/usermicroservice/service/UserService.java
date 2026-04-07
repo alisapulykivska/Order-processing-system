@@ -1,9 +1,11 @@
 package com.kafka.usermicroservice.service;
 
+import com.kafka.usermicroservice.service.dto.UserDto;
 import com.kafka.usermicroservice.service.dto.UserResponse;
 import jakarta.ws.rs.core.Response;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.RealmResource;
+import org.keycloak.admin.client.resource.UserResource;
 import org.keycloak.admin.client.resource.UsersResource;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
@@ -55,6 +57,23 @@ public class UserService {
 
     public UserRepresentation getUserById(String userId){
         return getUsersResource().get(userId).toRepresentation();
+    }
+
+    public UserRepresentation updateUser(String userId, UserDto newUser) {
+        UserResource userResource = getUsersResource().get(userId);
+
+        UserRepresentation userRepresentation = userResource.toRepresentation();
+        userRepresentation.setUsername(newUser.username());
+        userRepresentation.setEmail(newUser.email());
+
+        CredentialRepresentation credential = userResource.credentials().getLast();
+        credential.setValue(newUser.password());
+
+        userRepresentation.setCredentials(Collections.singletonList(credential));
+
+        userResource.update(userRepresentation);
+
+        return userRepresentation;
     }
 
     public void deleteUserById(String userId){
