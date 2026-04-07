@@ -13,10 +13,7 @@ import com.kafka.productmicroservice.entity.Product;
 import com.kafka.productmicroservice.repository.CartItemRepository;
 import com.kafka.productmicroservice.repository.CartRepository;
 import com.kafka.productmicroservice.repository.ProductRepository;
-import com.kafka.productmicroservice.service.dto.AddToCartDto;
-import com.kafka.productmicroservice.service.dto.CheckoutDto;
-import com.kafka.productmicroservice.service.dto.CreateProductDto;
-import com.kafka.productmicroservice.service.dto.RemoveFromCartDto;
+import com.kafka.productmicroservice.service.dto.*;
 import lombok.AllArgsConstructor;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
@@ -162,4 +159,24 @@ public class ProductServiceImpl implements ProductService {
     public List<Product> getAllProducts(){
         return productRepository.findAll();
     }
+
+    public Product getProductById(Long productId) {
+        return productRepository.findById(productId).orElseThrow(() -> new ProductNotFoundException(productId));
+    }
+
+    @Override
+    public void deleteProduct(Long productId) {
+        productRepository.deleteById(productId);
+    }
+
+    public Product updateProduct(Long productId, UpdateProductDto updateProductDto) {
+        Product product = productRepository.findById(productId).orElseThrow(() -> new ProductNotFoundException(productId));
+        product.builder()
+                .title(updateProductDto.title())
+                .price(updateProductDto.price())
+                .quantity(updateProductDto.quantity());
+        return productRepository.save(product);
+    }
+
+
 }

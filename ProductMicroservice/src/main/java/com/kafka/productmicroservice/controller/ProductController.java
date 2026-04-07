@@ -3,11 +3,7 @@ package com.kafka.productmicroservice.controller;
 
 import com.kafka.productmicroservice.entity.Product;
 import com.kafka.productmicroservice.service.ProductService;
-import com.kafka.productmicroservice.service.ProductServiceImpl;
-import com.kafka.productmicroservice.service.dto.AddToCartDto;
-import com.kafka.productmicroservice.service.dto.CheckoutDto;
-import com.kafka.productmicroservice.service.dto.CreateProductDto;
-import com.kafka.productmicroservice.service.dto.RemoveFromCartDto;
+import com.kafka.productmicroservice.service.dto.*;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -58,6 +54,21 @@ public class ProductController {
     @GetMapping
     public ResponseEntity<List<Product>> getAllProducts(){
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(productService.getAllProducts());
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Product> getProductById(@PathVariable Long id){
+        return ResponseEntity.ok(productService.getProductById(id));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Product> updateProduct(@PathVariable Long id, @RequestBody @Valid UpdateProductDto product){
+        return ResponseEntity.ok(productService.updateProduct(id, product));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteProduct(@PathVariable Long id){
+        return ResponseEntity.noContent().build();
     }
 
 }
