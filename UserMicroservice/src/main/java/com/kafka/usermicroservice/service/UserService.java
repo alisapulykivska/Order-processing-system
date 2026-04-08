@@ -1,5 +1,6 @@
 package com.kafka.usermicroservice.service;
 
+import com.kafka.core.dto.PagedResponse;
 import com.kafka.usermicroservice.service.dto.UserDto;
 import com.kafka.usermicroservice.service.dto.UserResponse;
 import jakarta.ws.rs.core.Response;
@@ -66,7 +67,8 @@ public class UserService {
         userRepresentation.setUsername(newUser.username());
         userRepresentation.setEmail(newUser.email());
 
-        CredentialRepresentation credential = userResource.credentials().getLast();
+        List<CredentialRepresentation> credentials = userResource.credentials();
+        CredentialRepresentation credential = credentials.get(credentials.size() - 1);
         credential.setValue(newUser.password());
 
         userRepresentation.setCredentials(Collections.singletonList(credential));
@@ -80,12 +82,19 @@ public class UserService {
         getUsersResource().delete(userId);
     }
 
-    public List<UserResponse> getAllUsers() {
-        List<UserRepresentation> users = getUsersResource().list();
+    public PagedResponse<UserResponse> getAllUsers(int page, int size) {
+        UsersResource usersResource = getUsersResource();
 
-        return users.stream()
+        int first = page * size;
+        List<UserRepresentation> users = usersResource.list(first, size);
+
+        int total = usersResource.count();
+
+        List<UserResponse> mapped = users.stream()
                 .map(u -> new UserResponse(u.getUsername(), u.getEmail()))
                 .toList();
+
+        return new PagedResponse<>(mapped, page, size, total);
     }
 
 }

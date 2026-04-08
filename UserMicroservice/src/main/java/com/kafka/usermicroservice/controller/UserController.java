@@ -1,16 +1,13 @@
 package com.kafka.usermicroservice.controller;
 
 import com.kafka.usermicroservice.service.UserService;
+import com.kafka.core.dto.PagedResponse;
 import com.kafka.usermicroservice.service.dto.UserDto;
 import com.kafka.usermicroservice.service.dto.UserResponse;
 import lombok.AllArgsConstructor;
 import org.keycloak.representations.idm.UserRepresentation;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -49,10 +46,12 @@ public class UserController {
 
     }
 
-    @PreAuthorize("hasRole('admin')")
-    @GetMapping("/")
-    public ResponseEntity<List<UserResponse>> findAllUsers() {
-        return ResponseEntity.ok(userService.getAllUsers()); // todo: add pageable
+    @GetMapping
+    public ResponseEntity<PagedResponse<UserResponse>> findAllUsers(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        return ResponseEntity.ok(userService.getAllUsers(page, size));
     }
 
     @DeleteMapping("/{id}")
