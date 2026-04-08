@@ -17,6 +17,10 @@ spring:
               uri: http://localhost:20001
               predicates:
                 - Path=/product/**
+            - id: order-service
+              uri: http://localhost:20002
+              predicates:
+                - Path=/order/**
 
 logging:
   level:

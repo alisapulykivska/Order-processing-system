@@ -159,13 +159,13 @@ public class ProductServiceImpl implements ProductService {
     public List<Product> getAllProducts(){
         return productRepository.findAll();
     }
-
+    // todo: create ProductDetailsDto and show orders with selected product in them
     public Product getProductById(Long productId) {
         return productRepository.findById(productId).orElseThrow(() -> new ProductNotFoundException(productId));
     }
 
     @Override
-    public void deleteProduct(Long productId) {
+    public void deleteProduct(Long productId) { // todo: Check if uncompleted orders with product exist
         productRepository.deleteById(productId);
     }
 

@@ -12,6 +12,7 @@ import com.kafka.ordermicroservice.repository.OrderItemRepository;
 import com.kafka.ordermicroservice.repository.OrderRepository;
 
 import com.kafka.core.dto.OrderItemDto;
+import com.kafka.ordermicroservice.service.dto.OrderDetailsDto;
 import lombok.AllArgsConstructor;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.slf4j.Logger;
@@ -23,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
@@ -150,4 +152,19 @@ public class OrderServiceImpl implements OrderService {
         order.setStatus(OrderStatus.REJECTED);
         orderRepository.save(order);
     }
+
+    @Override
+    public List<Order> getAllOrders() {
+        return orderRepository.findAll();
+    }
+
+    public OrderDetailsDto getOrderById(Long orderId) {
+        Order order = orderRepository.findById(orderId).orElseThrow(() -> new OrderNotFoundException(orderId));
+        //List<OrderItem> items = orderItemRepository.findByOrderId(orderId);
+        return new OrderDetailsDto(orderId,
+                order.getUserId(),
+                order.getItems(),
+                order.getStatus());
+    }
+
 }
