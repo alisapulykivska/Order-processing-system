@@ -14,11 +14,9 @@ public class KeycloakConfig {
         return KeycloakBuilder.builder()
                 .serverUrl("http://localhost:8080/")
                 .realm("master")
-                .grantType(OAuth2Constants.PASSWORD)
+                .grantType(OAuth2Constants.CLIENT_CREDENTIALS)
                 .clientId("admin-cli")
-                .clientSecret("6aqtmyvJFBsacAC8VF6FdKCnH7adpEq3")
-                .username("admin")
-                .password("admin")
+                .clientSecret("9IG90CXur0kP4ef1vq2iBForoBg5ZkVq")
                 .build();
     }
 }

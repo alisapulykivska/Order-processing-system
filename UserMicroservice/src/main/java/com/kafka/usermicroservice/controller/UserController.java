@@ -2,7 +2,8 @@ package com.kafka.usermicroservice.controller;
 
 import com.kafka.usermicroservice.service.UserService;
 import com.kafka.core.dto.PagedResponse;
-import com.kafka.usermicroservice.service.dto.UserDto;
+import com.kafka.usermicroservice.service.dto.CreateUserDto;
+import com.kafka.usermicroservice.service.dto.UpdateUserDto;
 import com.kafka.usermicroservice.service.dto.UserResponse;
 import lombok.AllArgsConstructor;
 import org.keycloak.representations.idm.UserRepresentation;
@@ -30,7 +31,7 @@ public class UserController {
      */
 
     @PostMapping("/register")
-    public ResponseEntity<String> register(@RequestBody UserDto user) {
+    public ResponseEntity<String> register(@RequestBody CreateUserDto user) {
         userService.registerUser(user.username(), user.email(), user.password());
         return ResponseEntity.ok("User registered successfully");
     }
@@ -39,11 +40,10 @@ public class UserController {
     public ResponseEntity<UserRepresentation> findUserById(@PathVariable String id) {
         return ResponseEntity.ok(userService.getUserById(id));
     }
-
+    // todo: add validation
     @PutMapping("/{id}")
-    public ResponseEntity<UserRepresentation> updateUser(@PathVariable String id, @RequestBody UserDto user) {
+    public ResponseEntity<UserRepresentation> updateUser(@PathVariable String id, @RequestBody UpdateUserDto user) {
         return ResponseEntity.ok(userService.updateUser(id, user));
-
     }
 
     @GetMapping

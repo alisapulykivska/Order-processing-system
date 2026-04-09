@@ -1,7 +1,7 @@
 package com.kafka.usermicroservice.service;
 
 import com.kafka.core.dto.PagedResponse;
-import com.kafka.usermicroservice.service.dto.UserDto;
+import com.kafka.usermicroservice.service.dto.UpdateUserDto;
 import com.kafka.usermicroservice.service.dto.UserResponse;
 import jakarta.ws.rs.core.Response;
 import org.keycloak.admin.client.Keycloak;
@@ -10,12 +10,15 @@ import org.keycloak.admin.client.resource.UserResource;
 import org.keycloak.admin.client.resource.UsersResource;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
 
 @Service
 public class UserService {
+    private static final Logger log = LoggerFactory.getLogger(UserService.class);
     private final Keycloak keycloak;
     private final String realm = "orderflow";
 
@@ -60,20 +63,21 @@ public class UserService {
         return getUsersResource().get(userId).toRepresentation();
     }
 
-    public UserRepresentation updateUser(String userId, UserDto newUser) {
+    public UserRepresentation updateUser(String userId, UpdateUserDto newUser) {
         UserResource userResource = getUsersResource().get(userId);
 
         UserRepresentation userRepresentation = userResource.toRepresentation();
-        userRepresentation.setUsername(newUser.username());
         userRepresentation.setEmail(newUser.email());
-
-        List<CredentialRepresentation> credentials = userResource.credentials();
-        CredentialRepresentation credential = credentials.get(credentials.size() - 1);
-        credential.setValue(newUser.password());
-
-        userRepresentation.setCredentials(Collections.singletonList(credential));
+        userRepresentation.setEnabled(true);
 
         userResource.update(userRepresentation);
+
+        CredentialRepresentation credential = new CredentialRepresentation();
+        credential.setType(CredentialRepresentation.PASSWORD);
+        credential.setValue(newUser.password());
+        credential.setTemporary(false);
+
+        userResource.resetPassword(credential);
 
         return userRepresentation;
     }
