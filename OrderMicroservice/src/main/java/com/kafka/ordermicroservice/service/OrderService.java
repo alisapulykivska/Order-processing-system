@@ -1,6 +1,7 @@
 package com.kafka.ordermicroservice.service;
 
 import com.kafka.core.command.CreateOrderCommand;
+import com.kafka.core.dto.GetAmountOfOrderedByProductDto;
 import com.kafka.ordermicroservice.entity.Order;
 import com.kafka.ordermicroservice.service.dto.OrderDetailsDto;
 
@@ -13,4 +14,5 @@ public interface OrderService {
     void rejectOrder(Long orderId);
     List<Order> getAllOrders();
     OrderDetailsDto getOrderById(Long orderId);
+    List<GetAmountOfOrderedByProductDto> getAmountOfOrderedByProduct(Long productId);
 }

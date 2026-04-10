@@ -1,6 +1,7 @@
 package com.kafka.ordermicroservice.service;
 
 import com.kafka.core.command.CreateOrderCommand;
+import com.kafka.core.dto.GetAmountOfOrderedByProductDto;
 import com.kafka.core.event.OrderApprovedEvent;
 import com.kafka.core.event.OrderCreatedEvent;
 import com.kafka.core.exception.order.OrderCreationException;
@@ -21,12 +22,13 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.Assert;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -166,5 +168,20 @@ public class OrderServiceImpl implements OrderService {
                 order.getItems(),
                 order.getStatus());
     }
+
+    public List<GetAmountOfOrderedByProductDto> getAmountOfOrderedByProduct(Long productId) {
+        List<OrderItem> orderItems = orderItemRepository.findAllByProductId(productId);
+
+        Map<Long, Long> grouped = orderItems.stream()
+                .collect(Collectors.groupingBy(
+                        oi -> oi.getOrder().getId(),
+                        Collectors.summingLong(OrderItem::getQuantity)
+                ));
+
+        return grouped.entrySet().stream()
+                .map(entry -> new GetAmountOfOrderedByProductDto(entry.getKey(), entry.getValue()))
+                .toList();
+    }
+
 
 }
