@@ -15,7 +15,7 @@ public interface ProductService {
     void clearCart(Long orderId);
     void removeProductFromCart(RemoveFromCartDto removeFromCartDto);
     List<Product> getAllProducts();
-    Product getProductById(Long productId);
+    ProductDetailsDto getProductById(Long productId);
     void deleteProduct(Long productId);
     Product updateProduct(Long productId, UpdateProductDto updateProductDto);
 }
