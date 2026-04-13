@@ -173,7 +173,6 @@ public class ProductServiceImpl implements ProductService {
     public List<Product> getAllProducts(){
         return productRepository.findAll();
     }
-    // todo: create ProductDetailsDto and show orders with selected product in them
     public ProductDetailsDto getProductById(Long productId) {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new ProductNotFoundException(productId));
