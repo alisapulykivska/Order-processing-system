@@ -1,6 +1,7 @@
 package com.kafka.ordermicroservice.service;
 
 import com.kafka.core.command.CreateOrderCommand;
+import com.kafka.core.dto.GetAmountOfOrderedByProductDto;
 import com.kafka.core.event.OrderApprovedEvent;
 import com.kafka.core.event.OrderCreatedEvent;
 import com.kafka.core.exception.order.OrderCreationException;
@@ -12,6 +13,7 @@ import com.kafka.ordermicroservice.repository.OrderItemRepository;
 import com.kafka.ordermicroservice.repository.OrderRepository;
 
 import com.kafka.core.dto.OrderItemDto;
+import com.kafka.ordermicroservice.service.dto.OrderDetailsDto;
 import lombok.AllArgsConstructor;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.slf4j.Logger;
@@ -20,11 +22,13 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.Assert;
 
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -150,4 +154,34 @@ public class OrderServiceImpl implements OrderService {
         order.setStatus(OrderStatus.REJECTED);
         orderRepository.save(order);
     }
+
+    @Override
+    public List<Order> getAllOrders() {
+        return orderRepository.findAll();
+    }
+
+    public OrderDetailsDto getOrderById(Long orderId) {
+        Order order = orderRepository.findById(orderId).orElseThrow(() -> new OrderNotFoundException(orderId));
+        //List<OrderItem> items = orderItemRepository.findByOrderId(orderId);
+        return new OrderDetailsDto(orderId,
+                order.getUserId(),
+                order.getItems(),
+                order.getStatus());
+    }
+
+    public List<GetAmountOfOrderedByProductDto> getAmountOfOrderedByProduct(Long productId) {
+        List<OrderItem> orderItems = orderItemRepository.findAllByProductId(productId);
+
+        Map<Long, Long> grouped = orderItems.stream()
+                .collect(Collectors.groupingBy(
+                        oi -> oi.getOrder().getId(),
+                        Collectors.summingLong(OrderItem::getQuantity)
+                ));
+
+        return grouped.entrySet().stream()
+                .map(entry -> new GetAmountOfOrderedByProductDto(entry.getKey(), entry.getValue()))
+                .toList();
+    }
+
+
 }

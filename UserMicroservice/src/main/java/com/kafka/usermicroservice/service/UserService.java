@@ -1,18 +1,24 @@
 package com.kafka.usermicroservice.service;
 
+import com.kafka.core.dto.PagedResponse;
+import com.kafka.usermicroservice.service.dto.UpdateUserDto;
 import com.kafka.usermicroservice.service.dto.UserResponse;
 import jakarta.ws.rs.core.Response;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.RealmResource;
+import org.keycloak.admin.client.resource.UserResource;
 import org.keycloak.admin.client.resource.UsersResource;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
 
 @Service
 public class UserService {
+    private static final Logger log = LoggerFactory.getLogger(UserService.class);
     private final Keycloak keycloak;
     private final String realm = "orderflow";
 
@@ -57,16 +63,42 @@ public class UserService {
         return getUsersResource().get(userId).toRepresentation();
     }
 
+    public UserRepresentation updateUser(String userId, UpdateUserDto newUser) {
+        UserResource userResource = getUsersResource().get(userId);
+
+        UserRepresentation userRepresentation = userResource.toRepresentation();
+        userRepresentation.setEmail(newUser.email());
+        userRepresentation.setEnabled(true);
+
+        userResource.update(userRepresentation);
+
+        CredentialRepresentation credential = new CredentialRepresentation();
+        credential.setType(CredentialRepresentation.PASSWORD);
+        credential.setValue(newUser.password());
+        credential.setTemporary(false);
+
+        userResource.resetPassword(credential);
+
+        return userRepresentation;
+    }
+
     public void deleteUserById(String userId){
         getUsersResource().delete(userId);
     }
 
-    public List<UserResponse> getAllUsers() {
-        List<UserRepresentation> users = getUsersResource().list();
+    public PagedResponse<UserResponse> getAllUsers(int page, int size) {
+        UsersResource usersResource = getUsersResource();
 
-        return users.stream()
+        int first = page * size;
+        List<UserRepresentation> users = usersResource.list(first, size);
+
+        int total = usersResource.count();
+
+        List<UserResponse> mapped = users.stream()
                 .map(u -> new UserResponse(u.getUsername(), u.getEmail()))
                 .toList();
+
+        return new PagedResponse<>(mapped, page, size, total);
     }
 
 }

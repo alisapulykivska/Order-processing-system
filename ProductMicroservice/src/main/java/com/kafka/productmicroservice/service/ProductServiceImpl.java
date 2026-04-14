@@ -1,6 +1,7 @@
 package com.kafka.productmicroservice.service;
 
 import com.kafka.core.command.CreateOrderCommand;
+import com.kafka.core.dto.GetAmountOfOrderedByProductDto;
 import com.kafka.core.dto.OrderItemDto;
 import com.kafka.core.entity.ReservedProduct;
 import com.kafka.core.exception.product.CartItemNotFoundException;
@@ -13,26 +14,36 @@ import com.kafka.productmicroservice.entity.Product;
 import com.kafka.productmicroservice.repository.CartItemRepository;
 import com.kafka.productmicroservice.repository.CartRepository;
 import com.kafka.productmicroservice.repository.ProductRepository;
-import com.kafka.productmicroservice.service.dto.AddToCartDto;
-import com.kafka.productmicroservice.service.dto.CheckoutDto;
-import com.kafka.productmicroservice.service.dto.CreateProductDto;
-import com.kafka.productmicroservice.service.dto.RemoveFromCartDto;
-import lombok.AllArgsConstructor;
+import com.kafka.productmicroservice.service.dto.*;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestClient;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 @Service
-@AllArgsConstructor
 public class ProductServiceImpl implements ProductService {
     private final ProductRepository productRepository;
     private final CartRepository cartRepository;
     private final CartItemRepository cartItemRepository;
     private final KafkaTemplate<String, Object> kafkaTemplate;
+    private final RestClient restClient;
+
+    public ProductServiceImpl(ProductRepository productRepository,
+                              CartRepository cartRepository,
+                              CartItemRepository cartItemRepository,
+                              KafkaTemplate<String, Object> kafkaTemplate,
+                              RestClient.Builder builder) {
+        this.productRepository = productRepository;
+        this.cartRepository = cartRepository;
+        this.cartItemRepository = cartItemRepository;
+        this.kafkaTemplate = kafkaTemplate;
+        this.restClient = builder.baseUrl("http://localhost:20002").build();
+    }
 
     @Override
     public String createProductAsync(CreateProductDto createProductDto) {
@@ -162,4 +173,33 @@ public class ProductServiceImpl implements ProductService {
     public List<Product> getAllProducts(){
         return productRepository.findAll();
     }
+    public ProductDetailsDto getProductById(Long productId) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new ProductNotFoundException(productId));
+
+        List<GetAmountOfOrderedByProductDto> amounts = restClient
+                .get()
+                .uri("/order/product/{id}", productId)
+                .retrieve()
+                .body(new ParameterizedTypeReference<List<GetAmountOfOrderedByProductDto>>() {});
+
+
+        return new ProductDetailsDto(product, amounts);
+    }
+
+    @Override
+    public void deleteProduct(Long productId) { // todo: Check if uncompleted orders with product exist
+        productRepository.deleteById(productId);
+    }
+
+    public Product updateProduct(Long productId, UpdateProductDto updateProductDto) {
+        Product product = productRepository.findById(productId).orElseThrow(() -> new ProductNotFoundException(productId));
+        product.builder()
+                .title(updateProductDto.title())
+                .price(updateProductDto.price())
+                .quantity(updateProductDto.quantity());
+        return productRepository.save(product);
+    }
+
+
 }

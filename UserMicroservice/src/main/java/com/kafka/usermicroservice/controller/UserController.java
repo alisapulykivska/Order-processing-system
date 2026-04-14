@@ -1,16 +1,14 @@
 package com.kafka.usermicroservice.controller;
 
 import com.kafka.usermicroservice.service.UserService;
-import com.kafka.usermicroservice.service.dto.UserDto;
+import com.kafka.core.dto.PagedResponse;
+import com.kafka.usermicroservice.service.dto.CreateUserDto;
+import com.kafka.usermicroservice.service.dto.UpdateUserDto;
 import com.kafka.usermicroservice.service.dto.UserResponse;
 import lombok.AllArgsConstructor;
 import org.keycloak.representations.idm.UserRepresentation;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -33,7 +31,7 @@ public class UserController {
      */
 
     @PostMapping("/register")
-    public ResponseEntity<String> register(@RequestBody UserDto user) {
+    public ResponseEntity<String> register(@RequestBody CreateUserDto user) {
         userService.registerUser(user.username(), user.email(), user.password());
         return ResponseEntity.ok("User registered successfully");
     }
@@ -42,11 +40,18 @@ public class UserController {
     public ResponseEntity<UserRepresentation> findUserById(@PathVariable String id) {
         return ResponseEntity.ok(userService.getUserById(id));
     }
+    // todo: add validation
+    @PutMapping("/{id}")
+    public ResponseEntity<UserRepresentation> updateUser(@PathVariable String id, @RequestBody UpdateUserDto user) {
+        return ResponseEntity.ok(userService.updateUser(id, user));
+    }
 
-    @PreAuthorize("hasRole('admin')")
-    @GetMapping("/")
-    public ResponseEntity<List<UserResponse>> findAllUsers() {
-        return ResponseEntity.ok(userService.getAllUsers()); // todo: add pageable
+    @GetMapping
+    public ResponseEntity<PagedResponse<UserResponse>> findAllUsers(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        return ResponseEntity.ok(userService.getAllUsers(page, size));
     }
 
     @DeleteMapping("/{id}")

@@ -1,10 +1,8 @@
 package com.kafka.paymentmicroservice.handler;
 
 import com.kafka.core.command.ProcessPaymentCommand;
-import com.kafka.core.entity.ReservedProduct;
 import com.kafka.core.event.PaymentFailedEvent;
 import com.kafka.core.event.PaymentProcessedEvent;
-import com.kafka.core.exception.CreditCardProcessorUnavailableException;
 import com.kafka.paymentmicroservice.entity.Payment;
 import com.kafka.paymentmicroservice.service.PaymentService;
 import lombok.AllArgsConstructor;
@@ -15,9 +13,6 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Component
 @KafkaListener(topics = "payments-commands")

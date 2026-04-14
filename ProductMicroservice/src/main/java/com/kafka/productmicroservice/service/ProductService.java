@@ -2,10 +2,7 @@ package com.kafka.productmicroservice.service;
 
 import com.kafka.core.entity.ReservedProduct;
 import com.kafka.productmicroservice.entity.Product;
-import com.kafka.productmicroservice.service.dto.AddToCartDto;
-import com.kafka.productmicroservice.service.dto.CheckoutDto;
-import com.kafka.productmicroservice.service.dto.CreateProductDto;
-import com.kafka.productmicroservice.service.dto.RemoveFromCartDto;
+import com.kafka.productmicroservice.service.dto.*;
 
 import java.util.List;
 
@@ -18,4 +15,7 @@ public interface ProductService {
     void clearCart(Long orderId);
     void removeProductFromCart(RemoveFromCartDto removeFromCartDto);
     List<Product> getAllProducts();
+    ProductDetailsDto getProductById(Long productId);
+    void deleteProduct(Long productId);
+    Product updateProduct(Long productId, UpdateProductDto updateProductDto);
 }
