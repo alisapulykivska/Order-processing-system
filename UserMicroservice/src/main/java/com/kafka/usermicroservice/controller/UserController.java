@@ -5,6 +5,7 @@ import com.kafka.core.dto.PagedResponse;
 import com.kafka.usermicroservice.service.dto.CreateUserDto;
 import com.kafka.usermicroservice.service.dto.UpdateUserDto;
 import com.kafka.usermicroservice.service.dto.UserResponse;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.http.ResponseEntity;
@@ -31,7 +32,7 @@ public class UserController {
      */
 
     @PostMapping("/register")
-    public ResponseEntity<String> register(@RequestBody CreateUserDto user) {
+    public ResponseEntity<String> register(@RequestBody @Valid CreateUserDto user) {
         userService.registerUser(user.username(), user.email(), user.password());
         return ResponseEntity.ok("User registered successfully");
     }
@@ -42,7 +43,7 @@ public class UserController {
     }
     // todo: add validation
     @PutMapping("/{id}")
-    public ResponseEntity<UserRepresentation> updateUser(@PathVariable String id, @RequestBody UpdateUserDto user) {
+    public ResponseEntity<UserRepresentation> updateUser(@PathVariable String id, @Valid @RequestBody UpdateUserDto user) {
         return ResponseEntity.ok(userService.updateUser(id, user));
     }
 
@@ -56,6 +57,6 @@ public class UserController {
 
     @DeleteMapping("/{id}")
     public void deleteUserById(@PathVariable String id) {
-        userService.deleteUserById(id); // return with status in case of error
+        userService.deleteUserById(id);
     }
 }
