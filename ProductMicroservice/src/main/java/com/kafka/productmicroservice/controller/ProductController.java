@@ -60,12 +60,12 @@ public class ProductController {
     public ResponseEntity<ProductDetailsDto> getProductById(@PathVariable Long id){
         return ResponseEntity.ok(productService.getProductById(id));
     }
-
+    @PreAuthorize("hasRole('admin')")
     @PutMapping("/{id}")
     public ResponseEntity<Product> updateProduct(@PathVariable Long id, @RequestBody @Valid UpdateProductDto product){
         return ResponseEntity.ok(productService.updateProduct(id, product));
     }
-
+    @PreAuthorize("hasRole('admin')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteProduct(@PathVariable Long id){
         return ResponseEntity.noContent().build();

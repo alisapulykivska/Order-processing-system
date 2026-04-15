@@ -41,7 +41,7 @@ public class UserController {
     public ResponseEntity<UserRepresentation> findUserById(@PathVariable String id) {
         return ResponseEntity.ok(userService.getUserById(id));
     }
-    // todo: add validation
+
     @PutMapping("/{id}")
     public ResponseEntity<UserRepresentation> updateUser(@PathVariable String id, @Valid @RequestBody UpdateUserDto user) {
         return ResponseEntity.ok(userService.updateUser(id, user));
