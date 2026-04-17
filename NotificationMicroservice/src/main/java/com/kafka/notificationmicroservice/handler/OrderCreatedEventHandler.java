@@ -4,7 +4,6 @@
     import com.kafka.notificationmicroservice.exception.NonRetryableException;
     import com.kafka.notificationmicroservice.persistence.entity.ProcessedEventEntity;
     import com.kafka.notificationmicroservice.persistence.repository.ProcessedEventRepository;
-    import lombok.AllArgsConstructor;
     import org.slf4j.Logger;
     import org.slf4j.LoggerFactory;
     import org.springframework.dao.DataIntegrityViolationException;
@@ -17,11 +16,15 @@
     import org.springframework.transaction.annotation.Transactional;
 
     @Component
-    @AllArgsConstructor
+    //@AllArgsConstructor
     @KafkaListener(topics = "order-created-events-topic", groupId = "order-created-events")
     public class OrderCreatedEventHandler {
 
         private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
+
+        public OrderCreatedEventHandler(ProcessedEventRepository processedEventRepository) {
+            this.processedEventRepository = processedEventRepository;
+        }
 
         private ProcessedEventRepository processedEventRepository;
 

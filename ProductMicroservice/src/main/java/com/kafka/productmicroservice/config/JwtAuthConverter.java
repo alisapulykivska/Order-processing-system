@@ -23,7 +23,7 @@ public class JwtAuthConverter implements Converter<Jwt, AbstractAuthenticationTo
     private final JwtGrantedAuthoritiesConverter jwtGrantedAuthoritiesConverter =
             new JwtGrantedAuthoritiesConverter();
 
-    private String principleAttribute = JwtClaimNames.SUB; // todo: inject from application.properties
+    private String principleAttribute = JwtClaimNames.SUB;
     private String resourceId = "orderflow-api";
 
     @Override

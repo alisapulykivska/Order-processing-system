@@ -188,7 +188,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public void deleteProduct(Long productId) { // todo: Check if uncompleted orders with product exist
+    public void deleteProduct(Long productId) {
         productRepository.deleteById(productId);
     }
 
