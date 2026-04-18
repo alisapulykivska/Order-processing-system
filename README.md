@@ -9,12 +9,11 @@ OrderFlow is project to gain hands-on experience working with microservices arch
 - [x] Custom exceptions for every microservice
 - [x] Authorization, Authentication, Security with Keycloak
 - [x] API Gateway with Spring Cloud
-- 🟡 Working on front-end admin page. CRUD should be implemented first
+- [x] CRUD for Product, Order, User entities
 
 ### 📝 Planned to be implemented:
-- [ ] CRUD for products, users, orders
-- [ ] InventoryMicroservice with sync (HTTP) requests using Spring Cloud
-- [ ] Admin webpage using Angular
+- [ ] 🟡 front-end page partly implemented
+- [ ] InventoryMicroservice with sync (HTTP) requests and Spring Cloud
 - [ ] LogisticsMicroservice with the shiping/delivery logic
 - [ ] Email notifications via NotificationMicroservice
 - [ ] Metrics and observability: Prometheus and Grafana
