@@ -12,11 +12,14 @@ OrderFlow is project to gain hands-on experience working with microservices arch
 - [x] CRUD for Product, Order, User entities
 
 ### 📝 Planned to be implemented:
+- [ ] Add Elasticsearch for ProductMicroservice
+- [ ] Add caching using Redis
+- [ ] Metrics and observability: Prometheus and Grafana
+- [ ] GraphQL Gateway
 - [ ] 🟡 front-end page partly implemented
 - [ ] InventoryMicroservice with sync (HTTP) requests and Spring Cloud
 - [ ] LogisticsMicroservice with the shiping/delivery logic
 - [ ] Email notifications via NotificationMicroservice
-- [ ] Metrics and observability: Prometheus and Grafana
 - [ ] CI/CD: Github Actions
 
 ## Current order processing logic
