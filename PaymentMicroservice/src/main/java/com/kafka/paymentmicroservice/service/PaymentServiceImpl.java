@@ -9,6 +9,7 @@ import com.kafka.paymentmicroservice.service.dto.GetDistanceDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
@@ -25,9 +26,11 @@ public class PaymentServiceImpl implements PaymentService {
     private final PaymentRepository paymentRepository;
     private final RestClient restClient;
 
-    public PaymentServiceImpl(PaymentRepository paymentRepository, RestClient.Builder builder) {
+    public PaymentServiceImpl(PaymentRepository paymentRepository,
+                              RestClient.Builder builder,
+                              @Value("${shipping-service.url}") String shippingServiceUrl) {
         this.paymentRepository = paymentRepository;
-        this.restClient = builder.baseUrl("http://localhost:10000/shipping/").build();
+        this.restClient = builder.baseUrl(shippingServiceUrl).build();
     }
     private final BigDecimal pricePerKm = BigDecimal.valueOf(0.45);
 

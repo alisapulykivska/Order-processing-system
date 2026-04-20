@@ -15,6 +15,7 @@ import com.kafka.productmicroservice.repository.CartItemRepository;
 import com.kafka.productmicroservice.repository.CartRepository;
 import com.kafka.productmicroservice.repository.ProductRepository;
 import com.kafka.productmicroservice.service.dto.*;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
@@ -37,12 +38,13 @@ public class ProductServiceImpl implements ProductService {
                               CartRepository cartRepository,
                               CartItemRepository cartItemRepository,
                               KafkaTemplate<String, Object> kafkaTemplate,
-                              RestClient.Builder builder) {
+                              RestClient.Builder builder,
+                              @Value("${order-service.url}") String orderServiceUrl) {
         this.productRepository = productRepository;
         this.cartRepository = cartRepository;
         this.cartItemRepository = cartItemRepository;
         this.kafkaTemplate = kafkaTemplate;
-        this.restClient = builder.baseUrl("http://localhost:20002").build();
+        this.restClient = builder.baseUrl(orderServiceUrl).build();
     }
 
     @Override

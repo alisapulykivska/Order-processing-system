@@ -8,17 +8,17 @@ spring:
         webflux:
           routes:
             - id: user-service
-              uri: http://localhost:20000
+              uri: ${USER_SERVICE_URL:http://localhost:20000}
               predicates:
                 - Path=/api/auth/**
               filters:
                 - PreserveHostHeader=true
             - id: product-service
-              uri: http://localhost:20001
+              uri: ${PRODUCT_SERVICE_URL:http://localhost:20001}
               predicates:
                 - Path=/product/**
             - id: order-service
-              uri: http://localhost:20002
+              uri: ${ORDER_SERVICE_URL:http://localhost:20002}
               predicates:
                 - Path=/order/**
 

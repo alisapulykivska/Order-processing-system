@@ -4,6 +4,7 @@ import com.kafka.core.event.ProductOrderedEvent;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
@@ -17,6 +18,12 @@ import java.util.Map;
 
 @Configuration
 public class KafkaConfig {
+
+    @Value("${kafka.topic.replicas:3}")
+    private int replicas;
+
+    @Value("${kafka.topic.min-insync-replicas:2}")
+    private String minInsyncReplicas;
 
     /*@Autowired
     Environment environment;
@@ -51,8 +58,8 @@ public class KafkaConfig {
     NewTopic newTopic(){
         return TopicBuilder.name("product-created-events-topic")
                 .partitions(3)
-                .replicas(3)
-                .configs(Map.of("min.insync.replicas","2")) // leader + 1 replica
+                .replicas(replicas)
+                .configs(Map.of("min.insync.replicas", minInsyncReplicas))
                 .build();
     }
 
@@ -60,7 +67,7 @@ public class KafkaConfig {
     NewTopic createProductsEventsTopic() {
         return TopicBuilder.name("products-events")
                 .partitions(3)
-                .replicas(3)
+                .replicas(replicas)
                 .build();
     }
 }
