@@ -1,17 +1,164 @@
-version: "3.9"
-
 services:
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.7.0
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
+
+  kafka:
+    image: confluentinc/cp-kafka:7.7.0
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+      - "29092:29092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+    healthcheck:
+      test: ["CMD", "kafka-topics", "--bootstrap-server", "localhost:9092", "--list"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
   keycloak:
     image: quay.io/keycloak/keycloak:26.3.2
     command:
       - start-dev
-      - --spi-export-realm-enabled=true
-      - --spi-export-realm-name=*
-      - --spi-export-realm-file=/opt/keycloak/data/export/realms.json
+      - --import-realm
+      - --health-enabled=true
     environment:
       KC_BOOTSTRAP_ADMIN_USERNAME: admin
       KC_BOOTSTRAP_ADMIN_PASSWORD: admin
     ports:
-      - "127.0.0.1:8080:8080"
+      - "8080:8080"
     volumes:
       - ./keycloak-data:/opt/keycloak/data
+    healthcheck:
+      test: ["CMD-SHELL", "exec 3<>/dev/tcp/localhost/8080"]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+      start_period: 30s
+
+  mock-shipping:
+    build:
+      context: .
+      dockerfile: mock-shipping-service/Dockerfile
+    ports:
+      - "10000:10000"
+
+  user-service:
+    build:
+      context: .
+      dockerfile: UserMicroservice/Dockerfile
+    ports:
+      - "20000:20000"
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      KEYCLOAK_ISSUER_URI: http://keycloak:8080/realms/orderflow
+      KEYCLOAK_JWK_SET_URI: http://keycloak:8080/realms/orderflow/protocol/openid-connect/certs
+      KEYCLOAK_SERVER_URL: http://keycloak:8080/
+      KEYCLOAK_CLIENT_SECRET: 9IG90CXur0kP4ef1vq2iBForoBg5ZkVq
+      CORS_ALLOWED_ORIGINS: "*"
+    depends_on:
+      kafka:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
+
+  product-service:
+    build:
+      context: .
+      dockerfile: ProductMicroservice/Dockerfile
+    ports:
+      - "20001:20001"
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      KEYCLOAK_ISSUER_URI: http://keycloak:8080/realms/orderflow
+      KEYCLOAK_JWK_SET_URI: http://keycloak:8080/realms/orderflow/protocol/openid-connect/certs
+      ORDER_SERVICE_URL: http://order-service:20002
+      CORS_ALLOWED_ORIGINS: "*"
+      KAFKA_TOPIC_REPLICAS: 1
+      KAFKA_TOPIC_MIN_INSYNC_REPLICAS: 1
+    depends_on:
+      kafka:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
+
+  order-service:
+    build:
+      context: .
+      dockerfile: OrderMicroservice/Dockerfile
+    ports:
+      - "20002:20002"
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      KAFKA_TOPIC_REPLICAS: 1
+      KAFKA_TOPIC_MIN_INSYNC_REPLICAS: 1
+    depends_on:
+      kafka:
+        condition: service_healthy
+
+  payment-service:
+    build:
+      context: .
+      dockerfile: PaymentMicroservice/Dockerfile
+    ports:
+      - "20003:20003"
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      SERVER_PORT: 20003
+      SHIPPING_SERVICE_URL: http://mock-shipping:10000/shipping/
+      KAFKA_TOPIC_REPLICAS: 1
+    depends_on:
+      kafka:
+        condition: service_healthy
+      mock-shipping:
+        condition: service_started
+
+  notification-service:
+    build:
+      context: .
+      dockerfile: NotificationMicroservice/Dockerfile
+    ports:
+      - "20004:20004"
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      SERVER_PORT: 20004
+    depends_on:
+      kafka:
+        condition: service_healthy
+
+  apigateway:
+    build:
+      context: .
+      dockerfile: apigateway/Dockerfile
+    ports:
+      - "8081:8081"
+    environment:
+      USER_SERVICE_URL: http://user-service:20000
+      PRODUCT_SERVICE_URL: http://product-service:20001
+      ORDER_SERVICE_URL: http://order-service:20002
+    depends_on:
+      - user-service
+      - product-service
+      - order-service
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    ports:
+      - "80:80"
+    depends_on:
+      - apigateway
