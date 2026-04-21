@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: order-service
+  namespace: orderflow
+spec:
+  selector:
+    app: order-service
+  ports:
+    - port: 20002
+      targetPort: 20002
+  type: ClusterIP

@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: payment-service
+  namespace: orderflow
+  labels:
+    app: payment-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: payment-service
+  template:
+    metadata:
+      labels:
+        app: payment-service
+    spec:
+      containers:
+        - name: payment-service
+          image: orderflow-payment-service:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 20003
+          envFrom:
+            - configMapRef:
+                name: kafka-config
+            - configMapRef:
+                name: services-config
+          env:
+            - name: SERVER_PORT
+              value: "20003"
+          readinessProbe:
+            tcpSocket:
+              port: 20003
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: 20003
+            initialDelaySeconds: 60
+            periodSeconds: 15
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "200m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"

@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: notification-service
+  namespace: orderflow
+spec:
+  selector:
+    app: notification-service
+  ports:
+    - port: 20004
+      targetPort: 20004
+  type: ClusterIP
