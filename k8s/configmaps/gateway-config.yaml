@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gateway-config
+  namespace: orderflow
+data:
+  USER_SERVICE_URL: "http://user-service.orderflow.svc.cluster.local:20000"
+  PRODUCT_SERVICE_URL: "http://product-service.orderflow.svc.cluster.local:20001"
+  ORDER_SERVICE_URL: "http://order-service.orderflow.svc.cluster.local:20002"

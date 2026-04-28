@@ -6,6 +6,7 @@ import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
@@ -19,6 +20,12 @@ import java.util.Map;
 
 @Configuration
 public class KafkaConfig {
+
+    @Value("${kafka.topic.replicas:3}")
+    private int replicas;
+
+    @Value("${kafka.topic.min-insync-replicas:2}")
+    private String minInsyncReplicas;
 
     /*@Autowired
     Environment environment;
@@ -53,8 +60,8 @@ public class KafkaConfig {
     NewTopic createOrdersEventsTopic(){
         return TopicBuilder.name("orders-events")
                 .partitions(3)
-                .replicas(3)
-                .configs(Map.of("min.insync.replicas","2")) // leader + 1 replica
+                .replicas(replicas)
+                .configs(Map.of("min.insync.replicas", minInsyncReplicas))
                 .build();
     }
 
@@ -62,8 +69,8 @@ public class KafkaConfig {
     NewTopic createProductsCommandsTopic(){
         return TopicBuilder.name("products-commands")
                 .partitions(3)
-                .replicas(3)
-                .configs(Map.of("min.insync.replicas","2")) // leader + 1 replica
+                .replicas(replicas)
+                .configs(Map.of("min.insync.replicas", minInsyncReplicas))
                 .build();
     }
 
@@ -71,14 +78,14 @@ public class KafkaConfig {
     NewTopic createPaymentsCommandsTopic(){
         return TopicBuilder.name("payments-commands")
                 .partitions(3)
-                .replicas(3)
+                .replicas(replicas)
                 .build();
     }
     @Bean
     NewTopic createOrdersCommandsTopic() {
         return TopicBuilder.name("orders-commands")
                 .partitions(3)
-                .replicas(3)
+                .replicas(replicas)
                 .build();
     }
 }

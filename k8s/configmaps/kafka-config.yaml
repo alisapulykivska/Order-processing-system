@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kafka-config
+  namespace: orderflow
+data:
+  KAFKA_BOOTSTRAP_SERVERS: "kafka.orderflow.svc.cluster.local:9092"
+  KAFKA_TOPIC_REPLICAS: "3"
+  KAFKA_TOPIC_MIN_INSYNC_REPLICAS: "2"

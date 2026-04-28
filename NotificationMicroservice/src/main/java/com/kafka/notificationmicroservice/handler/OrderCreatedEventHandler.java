@@ -34,12 +34,12 @@
                             @Header("messageId") String messageId,
                             @Header(KafkaHeaders.RECEIVED_KEY) String messageKey) {
 
-            LOGGER.info("Received product created event: " + orderCreatedEvent.getOrderId());
+            LOGGER.info("Received product created event: " + orderCreatedEvent.orderId());
 
             ProcessedEventEntity processedEventEntity = processedEventRepository.findByMessageId(messageId);
 
             if(processedEventEntity != null) {
-                LOGGER.info("Dublicate message id: {}", orderCreatedEvent.getOrderId());
+                LOGGER.info("Dublicate message id: {}", orderCreatedEvent.orderId());
                 return;
             }
 
@@ -48,7 +48,7 @@
             // after logic
 
             try{
-                processedEventRepository.save(new ProcessedEventEntity(messageId, orderCreatedEvent.getOrderId()));
+                processedEventRepository.save(new ProcessedEventEntity(messageId, String.valueOf(orderCreatedEvent.orderId())));
             } catch (DataIntegrityViolationException e) {
                 LOGGER.error(e.getMessage());
                 throw new NonRetryableException(e.getMessage());

@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mock-shipping-service
+  namespace: orderflow
+  labels:
+    app: mock-shipping-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mock-shipping-service
+  template:
+    metadata:
+      labels:
+        app: mock-shipping-service
+    spec:
+      containers:
+        - name: mock-shipping-service
+          image: orderflow-mock-shipping:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 10000
+          readinessProbe:
+            tcpSocket:
+              port: 10000
+            initialDelaySeconds: 20
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: 10000
+            initialDelaySeconds: 40
+            periodSeconds: 15
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "300m"

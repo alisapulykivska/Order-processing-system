@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: product-service
+  namespace: orderflow
+  labels:
+    app: product-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: product-service
+  template:
+    metadata:
+      labels:
+        app: product-service
+    spec:
+      containers:
+        - name: product-service
+          image: orderflow-product-service:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 20001
+          envFrom:
+            - configMapRef:
+                name: kafka-config
+            - configMapRef:
+                name: keycloak-config
+            - configMapRef:
+                name: services-config
+          readinessProbe:
+            tcpSocket:
+              port: 20001
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: 20001
+            initialDelaySeconds: 60
+            periodSeconds: 15
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "200m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"

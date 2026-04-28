@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: keycloak-config
+  namespace: orderflow
+data:
+  KEYCLOAK_ISSUER_URI: "http://keycloak.orderflow.svc.cluster.local:8080/realms/orderflow"
+  KEYCLOAK_JWK_SET_URI: "http://keycloak.orderflow.svc.cluster.local:8080/realms/orderflow/protocol/openid-connect/certs"
+  KEYCLOAK_SERVER_URL: "http://keycloak.orderflow.svc.cluster.local:8080/"

@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: apigateway
+  namespace: orderflow
+  labels:
+    app: apigateway
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: apigateway
+  template:
+    metadata:
+      labels:
+        app: apigateway
+    spec:
+      containers:
+        - name: apigateway
+          image: orderflow-apigateway:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8081
+          envFrom:
+            - configMapRef:
+                name: gateway-config
+          readinessProbe:
+            tcpSocket:
+              port: 8081
+            initialDelaySeconds: 20
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: 8081
+            initialDelaySeconds: 40
+            periodSeconds: 15
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "200m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"

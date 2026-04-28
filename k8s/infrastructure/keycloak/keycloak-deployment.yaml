@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: keycloak
+  namespace: orderflow
+  labels:
+    app: keycloak
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: keycloak
+  template:
+    metadata:
+      labels:
+        app: keycloak
+    spec:
+      containers:
+        - name: keycloak
+          image: quay.io/keycloak/keycloak:26.3.2
+          args: ["start-dev", "--import-realm", "--health-enabled=true"]
+          ports:
+            - containerPort: 8080
+          env:
+            - name: KC_BOOTSTRAP_ADMIN_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: keycloak-secret
+                  key: KC_BOOTSTRAP_ADMIN_USERNAME
+            - name: KC_BOOTSTRAP_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: keycloak-secret
+                  key: KC_BOOTSTRAP_ADMIN_PASSWORD
+          volumeMounts:
+            - name: keycloak-data
+              mountPath: /opt/keycloak/data
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "200m"
+            limits:
+              memory: "1Gi"
+              cpu: "500m"
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: 9000
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            failureThreshold: 15
+          livenessProbe:
+            httpGet:
+              path: /health/live
+              port: 9000
+            initialDelaySeconds: 120
+            periodSeconds: 15
+            failureThreshold: 10
+      volumes:
+        - name: keycloak-data
+          persistentVolumeClaim:
+            claimName: keycloak-data
